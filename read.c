@@ -6,20 +6,6 @@
 #include "types.h"
 #include "read.h"
 
-/* RESERVED CHARACTERS *******************************/
-
-char *reserved = "`'~ ";
-
-int is_reserved(char c) {
-  int i = 0;
-  char r;
-  while((r = reserved[i++]) != '\0') {
-    if(r == c)
-      return 1;
-  }
-  return 0;
-}
-
 /* READING *******************************/
 
 void* read_int(FILE* f) {
