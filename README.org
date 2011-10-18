@@ -1,5 +1,5 @@
 #+TODO: TODO INPROGRESS | DONE WONTFIX
-uberlisp: a lisp1 interpreter with reader macros and fexprs
+uberlisp: a lisp1 interpreter with GC, reader macros, and fexprs for hopefully running on Arduino
 * TODO finish alists
 ** needs some kind of eq
 * eval
