@@ -1,2 +1,4 @@
 *.o
-lisp
+uberlisp
+*.elf
+*.hex
