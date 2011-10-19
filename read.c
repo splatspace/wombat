@@ -41,7 +41,7 @@ void* read_symbol(FILE *f) {
 }
 
 int is_whitespace(char c) {
-  return isblank(c) ? 1 : 0;
+  return isblank(c);
 }
 
 void gobble_whitespace(FILE* f) {
