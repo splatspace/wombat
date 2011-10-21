@@ -1,1 +1,0 @@
-void* read(FILE* f);

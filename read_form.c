@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "types.h"
-#include "read.h"
+#include "read_form.h"
 
 /* READING *******************************/
 
@@ -57,7 +57,7 @@ void* read_list(FILE* f) {
   void* form;
   while ((c = getc(f)) != ')'){
     ungetc(c, f);
-    form = read(f);
+    form = read_form(f);
     /* T(form); */
     if(CAR(cell) && !CDR(cell)) {
       cell->cdr = form;
@@ -73,7 +73,7 @@ void* read_list(FILE* f) {
   return (void*)list;
 }
 
-void* read(FILE* f) {
+void* read_form(FILE* f) {
   char c = getc(f);
   if(isdigit(c)) {
     ungetc(c, f);
@@ -84,7 +84,7 @@ void* read(FILE* f) {
   } else if(c == '(') {
     return read_list(f);
   } else if(c == '\'') {
-    return cons(s("quote"), read(f));
+    return cons(s("quote"), read_form(f));
   }
-  return read(f);
+  return read_form(f);
 }

@@ -3,14 +3,14 @@
 
 # Your TTY might be different.  Look for /dev/tty.serial or .modem
 # devices, and set TTY accordingly:
-TTY        = /dev/tty.usbmodemfa141
+TTY        = /dev/ttyUSB0
+BAUD       = 57600
 
 DEVICE     = atmega328p
 CLOCK      = 16000000UL
-PROGRAMMER = -P $(TTY) -c arduino
-OBJECTS    = main.o print.o read.o types.o
+OBJECTS    = main.o print_form.o read_form.o types.o
 
-AVRDUDE = avrdude -F -V -c arduino -p $(DEVICE) $(PROGRAMMER) -b 115200
+AVRDUDE = avrdude -c arduino -p $(DEVICE) -P $(TTY) -b $(BAUD)
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 
 all:	main.hex

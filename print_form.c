@@ -1,11 +1,11 @@
 #include <stdio.h>
 
 #include "types.h"
-#include "print.h"
+#include "print_form.h"
 
 /* PRINTING *******************************/
 
-void print(void* x) {
+void print_form(void* x) {
   if(x) {
     switch(TYPE(x)) {
     case INT:
@@ -17,12 +17,12 @@ void print(void* x) {
     case CONS:
       {
         printf("(");
-        print(CAR(x));
+        print_form(CAR(x));
 
         if(CDR(x))
           printf(" ");
 
-        print(CDR(x));
+        print_form(CDR(x));
         printf(")");
         break;
       }
