@@ -48,40 +48,36 @@ void serial_init(unsigned int bittimer)
   return;
 }
 
-unsigned char serial_read(void)
+static int serial_read(FILE *stream)
 {
   while( !(UCSR0A & (1 << RXC0)) )
     ;
-  return UDR0;
+  return (int)UDR0;
 }
 
-void serial_write(unsigned char c)
+static int serial_write(char c, FILE *stream)
 {
+  if (c == '\n')
+    serial_write('\r', stream);
+
   while ( !(UCSR0A & (1 << UDRE0)) )
     ;
   UDR0 = c;
+  return 0;
 }
-
-void serial_write_str(char *str) {
-  char c = *str;
-  while(c) {
-    serial_write(c);
-    c++;
-  }
-}
-
-
 
 #define SPEED 9600
 int main (void)
 {
   /* let the preprocessor calculate this */
   serial_init( ( F_CPU / SPEED / 16 ) - 1);
+  fdevopen(serial_write, NULL);
+  fdevopen(NULL, serial_read);
 
   while (1) {
-    serial_write_str("=> ");
+    printf("=> ");
     print_form(read_form(stdin));
-    serial_write('\n');
+    printf("\n");
   }
   return 0;
 }
