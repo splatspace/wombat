@@ -23,7 +23,10 @@ typedef struct cons {
 
 /* Booleans **********************************/
 
+//TRUE is defined statically as the symbol T.
 extern void *TRUE;
+
+//FALSE is defined statically as the empty list.
 extern void *FALSE;
 
 /* Type Helpers ******************************/
