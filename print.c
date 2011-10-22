@@ -5,24 +5,24 @@
 
 /* PRINTING *******************************/
 
-void print(void* x) {
-  if(x) {
-    switch(type(x)) {
+void print(void* form) {
+  if(form) {
+    switch(type(form)) {
     case INT:
-      printf("%d", IVAL(x));
+      printf("%d", IVAL(form));
       break;
     case SYMBOL:
-      printf("%s", SVAL(x));
+      printf("%s", SVAL(form));
       break;
     case CONS:
       {
         printf("(");
-        print(CAR(x));
+        print(CAR(form));
 
-        if(CDR(x))
+        if(CDR(form))
           printf(" ");
 
-        print(CDR(x));
+        print(CDR(form));
         printf(")");
         break;
       }

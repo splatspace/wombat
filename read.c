@@ -8,7 +8,7 @@
 
 /* READING *******************************/
 
-void* read_int(FILE* f) {
+void* _read_int(FILE* f) {
   char buf[17]; /* 16 digit limit on numbers */
   memset(buf, '\0', 17);
   int n = 0;
@@ -24,7 +24,7 @@ void* read_int(FILE* f) {
   return (void*)int_atom(atoi(buf));
 }
 
-void* read_symbol(FILE *f) {
+void* _read_symbol(FILE *f) {
   char buf[17]; /* 16 character limit on symbols */
   memset(buf, '\0', 17);
   int n = 0;
@@ -50,7 +50,7 @@ void gobble_whitespace(FILE* f) {
   ungetc(c, f);
 }
 
-void* read_list(FILE* f) {
+void* _read_list(FILE* f) {
   char c;
   Cons* list = cons(NULL,NULL);
   Cons* cell = list;
@@ -76,12 +76,12 @@ void* read(FILE* f) {
   char c = getc(f);
   if(isdigit(c)) {
     ungetc(c, f);
-    return read_int(f);
+    return _read_int(f);
   } else if(isalpha(c)) {
     ungetc(c, f);
-    return read_symbol(f);
+    return _read_symbol(f);
   } else if(c == '(') {
-    return read_list(f);
+    return _read_list(f);
   } else if(c == '\'') {
     return cons(sym_atom("quote"), read(f));
   }

@@ -1,1 +1,2 @@
-void print(void* x);
+/* Prints form, a Lisp data structure, to stdout. */
+void print(void* form);
