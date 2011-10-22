@@ -2,34 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "types.h"
+
 #include "read_form.h"
 #include "print_form.h"
+#include "alist.h"
 
-/* SPECIAL FORMS *******************************/
-
-void* car(void* arglist) {
-  if(CONS_P(arglist)) {
-    return CONS(arglist)->car;
-  } else {
-    fprintf(stderr, "Can't get car of atom:\n");
-    print_form(arglist);
-    return NULL;
-  }
+void* car(void** env, void* args) {
+  return CAR(CONS(args));
 }
 
-void* cdr(void* arglist) {
-  if(CONS_P(arglist)) {
-    return CONS(arglist)->cdr;
-  } else {
-    fprintf(stderr, "Can't get cdr of atom:\n");
-    print_form(arglist);
-    return NULL;
-  }
+void* cdr(void** env, void* args) {
+  return CDR(CONS(args));
 }
 
-void* quote(void* expr) {
+void* quote(void** env, void* expr) {
   return expr;
 }
 
@@ -66,31 +53,45 @@ static int serial_write(char c, FILE *stream)
   return 0;
 }
 
+void* eq(void** env, void* args) {
+  return equal(CAR(CONS(args)), CDR(CONS(args)));
+}
+
+void* eval(void** env, void* args) {
+  switch(type(args)) {
+  case SYMBOL:
+    return get(*env, args);
+  default:
+    return args;
+  }
+}
+
 #define SPEED 9600
-int main (void)
-{
+
+int main(int argc, char *argv[]) {
   /* let the preprocessor calculate this */
   serial_init( ( F_CPU / SPEED / 16 ) - 1);
   fdevopen(serial_write, NULL);
   fdevopen(NULL, serial_read);
 
-  while (1) {
-    printf("=> ");
-    print_form(read_form(stdin));
-    printf("\n");
-  }
+  /* populate env with special forms */
+  void *env = empty_cons();
+  Special Car = { SPECIAL, "car", car };
+  Special Cdr = { SPECIAL, "cdr", cdr };
+  Special Quote = { SPECIAL, "quote", quote };
+  Special Eq = { SPECIAL, "eq", eq };
+  Special Eval = { SPECIAL, "eval", eval };  
+  assoc(&env, sym("car"), (void*)&Car);
+  assoc(&env, sym("cdr"), (void*)&Cdr);
+  assoc(&env, sym("quote"), (void*)&Quote);
+  assoc(&env, sym("eq"), (void*)&Eq);
+  assoc(&env, sym("eval"), (void*)&Eval);      
+
+  printf("Environment:\n");
+  print_form(env);
+  printf("\n-------\n");
+
+  eval(&env, cons(sym("eq"), cons(integer(1), integer(2))));
+  
   return 0;
 }
-
-/*
-int main(int argc, char *argv[]) {
-
-  while(1) {
-    printf("=> ");
-    print(read(stdin));
-    printf("\n");
-  }
-
-  return 0;
-}
-*/

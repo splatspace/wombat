@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-
 #include "types.h"
 
-/* UTIL *******************************/
+/* Utilities *******************************/
 
 /* sdbm hash, http://www.cse.yorku.ca/~oz/hash.html */
 unsigned long hash(char *str) {
@@ -16,8 +15,7 @@ unsigned long hash(char *str) {
   return hash;
 }
 
-
-/* TYPES *******************************/
+/* Type Initializers *******************/
 
 Cons* cons(void* car, void* cdr) {
   Cons* c = (Cons*)malloc(sizeof(Cons));
@@ -27,19 +25,23 @@ Cons* cons(void* car, void* cdr) {
   return c;
 }
 
-Atom* make_atom() {
+Cons* empty_cons() {
+  return cons(NULL, NULL);
+}
+
+Atom* _make_atom() {
   return (Atom*)malloc(sizeof(Atom));
 }
 
-Atom* i(int ival) {
-  Atom* a = make_atom();
+Atom* integer(int ival) {
+  Atom* a = _make_atom();
   a->type = INT;
   a->v.ival = ival;
   return a;
 }
 
-Atom* s(char *s) {
-  Atom* a = make_atom();
+Atom* sym(char *s) {
+  Atom* a = _make_atom();
   a->type = SYMBOL;
   int len = strlen(s);
   a->v.sval = (char*)malloc(sizeof(char)*(len+1));
@@ -48,18 +50,79 @@ Atom* s(char *s) {
   return a;
 }
 
-void rfree(void* x) {
-  switch(TYPE(x)) {
-  case INT:
-    /* no members to free */
-    break;
-  case SYMBOL:
-    free(SVAL(x));
-    break;
-  case CONS:
-    rfree(CAR(x));
-    rfree(CDR(x));
-    break;
+/* Boolean Initializers *********/
+
+Atom _TRUE = { SYMBOL, 32745841285307182, {"true"}};
+Atom _FALSE = { SYMBOL, 7272854437576874467, {"false"}};
+Atom _NIL = { SYMBOL, 473362056113, {"nil"}};
+void *TRUE = (void*)&_TRUE;
+void *FALSE = (void*)&_FALSE;
+void *NIL = (void*)&_NIL;
+
+enum types type(void* expr) {
+  return ((Type*)expr)->type;
+}
+
+int truthy(void* x) {
+  return (x != NIL) && (x != FALSE);
+}
+
+/* Equality ****************/
+
+void* equal(void* x, void* y) {
+  if (x == y) {
+    return TRUE;
+  } else {
+    switch(type(x)) {
+    case INT:
+      return (type(y) != INT)
+        ? FALSE
+        : (IVAL(x) == IVAL(y))
+          ? TRUE
+          : FALSE;
+    case SYMBOL:
+      return (type(y) != SYMBOL)
+        ? FALSE
+        : (HASHCODE(x) == HASHCODE(y))
+          ? TRUE
+          : FALSE;
+    case CONS:
+      return (type(y) != CONS)
+        ? FALSE
+        : equal(CAR(x), CAR(y))
+          ? equal(CDR(x), CDR(y))
+            ? TRUE
+            : FALSE
+          : FALSE;
+    default:
+      return FALSE;
+    }
   }
-  free(x);
+}
+
+void rfree(void* x) {
+  if ((x != NIL) &&
+      (x != TRUE) &&
+      (x != FALSE) &&
+      (x != NULL)) {
+    switch(type(x)) {
+    case SPECIAL:
+      /* can't be freed */      
+      return;
+    case FUNCTION:
+      /* TODO */
+      return;
+    case INT:
+      /* no members to free */
+      break;
+    case SYMBOL:
+      free(SVAL(x));
+      break;
+    case CONS:
+      rfree(CAR(x));
+      rfree(CDR(x));
+      break;
+    }
+    free(x);
+  }
 }

@@ -1,31 +1,35 @@
 #include <stdio.h>
-
 #include "types.h"
 #include "print_form.h"
 
 /* PRINTING *******************************/
+void print_form(void* form) {
+  switch(type(form)) {
+  case INT:
+    printf("%d", IVAL(form));
+    break;
+  case SYMBOL:
+    printf("%s", SVAL(form));
+    break;
+  case SPECIAL:
+    printf("#<special:%s>", ((Special*)form)->name);
+    break;
+  case FUNCTION:
+    printf("#<function>");
+    break;
+  case CONS:
+    {
+      printf("(");
 
-void print_form(void* x) {
-  if(x) {
-    switch(TYPE(x)) {
-    case INT:
-      printf("%d", IVAL(x));
-      break;
-    case SYMBOL:
-      printf("%s", SVAL(x));
-      break;
-    case CONS:
-      {
-        printf("(");
-        print_form(CAR(x));
+      if(CAR(form)) print_form(CAR(form));
 
-        if(CDR(x))
-          printf(" ");
-
-        print_form(CDR(x));
-        printf(")");
-        break;
+      if(CDR(form)) {
+        printf(" ");
+        print_form(CDR(form));        
       }
+
+      printf(")");
+      break;
     }
   }
 }

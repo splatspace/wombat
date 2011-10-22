@@ -1,13 +1,13 @@
 #+TODO: TODO INPROGRESS | DONE WONTFIX
-uberlisp: a lisp1 interpreter with GC, reader macros, and fexprs for hopefully running on Arduino
-* TODO finish alists
-** needs some kind of eq
+uberlisp: in-progress lisp1 interpreter with GC, reader macros, for PC and Arduino
+* INPROGRESS finish alists
+** DONE needs some kind of eq
 * eval
 ** TODO implement environments using alists
 ** TODO refer special forms to repl env
 ** TODO eval, apply
 * TODO remove limit on symbol size
-* TODO symbol equality with hash, identity with sdbm hashcode
+* DONE symbol equality with hash, identity with sdbm hashcode
 * numerics
 ** TODO remove limitation on size
 ** TODO support negative numbers

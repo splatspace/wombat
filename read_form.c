@@ -2,13 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "types.h"
 #include "read_form.h"
 
-/* READING *******************************/
-
-void* read_int(FILE* f) {
+void* _read_integer(FILE* f) {
   char buf[17]; /* 16 digit limit on numbers */
   memset(buf, '\0', 17);
   int n = 0;
@@ -21,10 +18,10 @@ void* read_int(FILE* f) {
       break;
     }
   }
-  return (void*)i(atoi(buf));
+  return (void*)integer(atoi(buf));
 }
 
-void* read_symbol(FILE *f) {
+void* _read_symbol(FILE *f) {
   char buf[17]; /* 16 character limit on symbols */
   memset(buf, '\0', 17);
   int n = 0;
@@ -37,20 +34,20 @@ void* read_symbol(FILE *f) {
       break;
     }
   }
-  return (void*)s(buf);
+  return (void*)sym(buf);
 }
 
-int is_whitespace(char c) {
-  return isblank(c);
+int _is_whitespace(char c) {
+  return isspace(c);
 }
 
-void gobble_whitespace(FILE* f) {
+void _gobble_whitespace(FILE* f) {
   char c;
-  while(is_whitespace(c = (getc(f))));
+  while(_is_whitespace(c = (getc(f))));
   ungetc(c, f);
 }
 
-void* read_list(FILE* f) {
+void* _read_list(FILE* f) {
   char c;
   Cons* list = cons(NULL,NULL);
   Cons* cell = list;
@@ -58,7 +55,6 @@ void* read_list(FILE* f) {
   while ((c = getc(f)) != ')'){
     ungetc(c, f);
     form = read_form(f);
-    /* T(form); */
     if(CAR(cell) && !CDR(cell)) {
       cell->cdr = form;
     } else if (CAR(cell) && CDR(cell)){
@@ -67,9 +63,8 @@ void* read_list(FILE* f) {
     } else {
       cell->car = form;
     }
-    gobble_whitespace(f);
+    _gobble_whitespace(f);
   }
-
   return (void*)list;
 }
 
@@ -77,14 +72,14 @@ void* read_form(FILE* f) {
   char c = getc(f);
   if(isdigit(c)) {
     ungetc(c, f);
-    return read_int(f);
+    return _read_integer(f);
   } else if(isalpha(c)) {
     ungetc(c, f);
-    return read_symbol(f);
+    return _read_symbol(f);
   } else if(c == '(') {
-    return read_list(f);
+    return _read_list(f);
   } else if(c == '\'') {
-    return cons(s("quote"), read_form(f));
+    return cons(sym("quote"), read_form(f));
   }
   return read_form(f);
 }
