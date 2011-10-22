@@ -65,7 +65,6 @@ void* _read_list(FILE* f) {
     }
     _gobble_whitespace(f);
   }
-
   return (void*)list;
 }
 
