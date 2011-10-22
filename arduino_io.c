@@ -17,6 +17,25 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stdio.h>
+
+static int serial_read(FILE *stream)
+{
+  while( !(UCSR0A & (1 << RXC0)) )
+    ;
+  return (int)UDR0;
+}
+
+static int serial_write(char c, FILE *stream)
+{
+  if (c == '\n')
+    serial_write('\r', stream);
+
+  while ( !(UCSR0A & (1 << UDRE0)) )
+    ;
+  UDR0 = c;
+  return 0;
+}
 
 void serial_init(unsigned int bittimer)
 {
@@ -27,33 +46,7 @@ void serial_init(unsigned int bittimer)
   UCSR0C = (3 << UCSZ00);
   /* Engage! */
   UCSR0B = (1 << RXEN0) | (1 << TXEN0);
-  return;
+
+  fdevopen(serial_write, NULL); 
+  fdevopen(NULL, serial_read);
 }
-
-unsigned char serial_read(void)
-{
-  while( !(UCSR0A & (1 << RXC0)) )
-    ;
-  return UDR0;
-}
-
-void serial_write(unsigned char c)
-{
-  while ( !(UCSR0A & (1 << UDRE0)) )
-    ;
-  UDR0 = c;
-}
-
-#define SPEED 9600
-int main (void)
-{
-  /* let the preprocessor calculate this */
-  serial_init( ( F_CPU / SPEED / 16 ) - 1);
-
-  while (1) {
-    /* read a character and echo back the next one */
-    serial_write( serial_read() + 1);
-  }
-  return 0;
-}
-
