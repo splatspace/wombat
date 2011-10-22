@@ -57,7 +57,7 @@ void* eval(void** env, void* expr) {
 
 int main(int argc, char *argv[]) {
 
-  VOID *env = empty();
+  void *env = empty();
   Special Car = { SPECIAL, "car", &car };
   Special Cdr = { SPECIAL, "cdr", &cdr };
   Special Quote = { SPECIAL, "quote", &quote };
