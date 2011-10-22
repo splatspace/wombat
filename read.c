@@ -2,11 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "types.h"
 #include "read.h"
-
-/* READING *******************************/
 
 void* _read_int(FILE* f) {
   char buf[17]; /* 16 digit limit on numbers */
@@ -40,13 +37,13 @@ void* _read_symbol(FILE *f) {
   return (void*)sym_atom(buf);
 }
 
-int is_whitespace(char c) {
+int _is_whitespace(char c) {
   return isspace(c);
 }
 
-void gobble_whitespace(FILE* f) {
+void _gobble_whitespace(FILE* f) {
   char c;
-  while(is_whitespace(c = (getc(f))));
+  while(_is_whitespace(c = (getc(f))));
   ungetc(c, f);
 }
 
@@ -66,7 +63,7 @@ void* _read_list(FILE* f) {
     } else {
       cell->car = form;
     }
-    gobble_whitespace(f);
+    _gobble_whitespace(f);
   }
 
   return (void*)list;

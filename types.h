@@ -1,4 +1,4 @@
-/* LISP TYPES *******************************/
+/* Lisp Types *******************************/
 
 enum types { CONS, SYMBOL, INT };
 
@@ -21,21 +21,21 @@ typedef struct cons {
   void *cdr;
 } Cons;
 
-/* BOOLEANS **********************************/
+/* Booleans **********************************/
 
 extern void *TRUE;
 extern void *FALSE;
 
-/* TYPE HELPERS ******************************/
+/* Type Helpers ******************************/
 
 enum types type(void* expr);
 Cons* cons(void* car, void* cdr);
 Atom* int_atom(int ival);
 Atom* sym_atom(char *s);
-void* _eq(void* x, void* y);
+void* equal(void* x, void* y);
 void rfree(void* x);
 
-/* TYPE MACROS *******************************/
+/* Type Macros *******************************/
 
 #define CONS(x) ((Cons*)x)
 #define CAR(x)  ((Cons*)x)->car

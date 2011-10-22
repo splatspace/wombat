@@ -2,12 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "types.h"
 #include "read.h"
 #include "print.h"
-
-/* SPECIAL FORMS *******************************/
 
 void* car(void* args) {
   return CAR(CONS(args));
@@ -22,7 +19,7 @@ void* quote(void* expr) {
 }
 
 void* eq(void* args) {
-  return _eq(CAR(CONS(args)), CDR(CONS(args)));
+  return equal(CAR(CONS(args)), CDR(CONS(args)));
 }
 
 int main(int argc, char *argv[]) {

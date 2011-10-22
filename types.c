@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-
 #include "types.h"
 
-/* UTIL *******************************/
+/* Utilities *******************************/
 
 /* sdbm hash, http://www.cse.yorku.ca/~oz/hash.html */
 unsigned long hash(char *str) {
@@ -16,7 +15,7 @@ unsigned long hash(char *str) {
   return hash;
 }
 
-/* TYPE INITIALIZERS *******************/
+/* Type Initializers *******************/
 
 Cons* cons(void* car, void* cdr) {
   Cons* c = (Cons*)malloc(sizeof(Cons));
@@ -47,8 +46,7 @@ Atom* sym_atom(char *s) {
   return a;
 }
 
-/* BOOLEAN INITIALIZERS *********/
-/* TRUE and FALSE are externs in types.h. */
+/* Boolean Initializers *********/
 
 Atom _TRUE = { SYMBOL, 84, { "T" }};
 Cons _FALSE = { CONS, NULL, NULL };
@@ -59,9 +57,9 @@ enum types type(void* expr) {
   return ((Type*)expr)->type;
 }
 
-/* EQUALITY ****************/
+/* Equality ****************/
 
-void* _eq(void* x, void* y) {
+void* equal(void* x, void* y) {
   if (x == y) {
     return TRUE;
   } else {
@@ -81,8 +79,8 @@ void* _eq(void* x, void* y) {
     case CONS:
       return (type(y) != CONS)
         ? FALSE
-        : _eq(CAR(x), CAR(y))
-          ? _eq(CDR(x), CDR(y))
+        : equal(CAR(x), CAR(y))
+          ? equal(CDR(x), CDR(y))
             ? TRUE
             : FALSE
           : FALSE;

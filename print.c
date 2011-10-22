@@ -1,9 +1,6 @@
 #include <stdio.h>
-
 #include "types.h"
 #include "print.h"
-
-/* PRINTING *******************************/
 
 void print(void* form) {
   if(form) {
