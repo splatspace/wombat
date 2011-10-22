@@ -7,7 +7,10 @@
 #include "read_form.h"
 #include "print_form.h"
 #include "alist.h"
+
+#ifdef ARDUINO
 #include "arduino_io.h"
+#endif
 
 void* car(void** env, void* expr) {
   return CAR(CONS(expr));
@@ -58,7 +61,9 @@ void* eval(void** env, void* expr) {
 
 int main(int argc, char *argv[]) {
 
+#ifdef ARDUINO
   ARDUINO_INIT_IO(9600);
+#endif
 
   /* populate env with special forms */
   void *env = empty();

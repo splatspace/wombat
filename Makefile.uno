@@ -11,7 +11,7 @@ CLOCK      = 16000000UL
 OBJECTS    = arduino_io.o alist.o main.o print_form.o read_form.o types.o
 
 AVRDUDE = avrdude -c arduino -p $(DEVICE) -P $(TTY) -b $(BAUD)
-COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
+COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -DARDUINO
 
 all:	main.hex
 
