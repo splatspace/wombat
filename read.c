@@ -5,7 +5,7 @@
 #include "types.h"
 #include "read.h"
 
-void* _read_int(FILE* f) {
+void* _read_integer(FILE* f) {
   char buf[17]; /* 16 digit limit on numbers */
   memset(buf, '\0', 17);
   int n = 0;
@@ -18,7 +18,7 @@ void* _read_int(FILE* f) {
       break;
     }
   }
-  return (void*)int_atom(atoi(buf));
+  return (void*)integer(atoi(buf));
 }
 
 void* _read_symbol(FILE *f) {
@@ -34,7 +34,7 @@ void* _read_symbol(FILE *f) {
       break;
     }
   }
-  return (void*)sym_atom(buf);
+  return (void*)sym(buf);
 }
 
 int _is_whitespace(char c) {
@@ -72,14 +72,14 @@ void* read(FILE* f) {
   char c = getc(f);
   if(isdigit(c)) {
     ungetc(c, f);
-    return _read_int(f);
+    return _read_integer(f);
   } else if(isalpha(c)) {
     ungetc(c, f);
     return _read_symbol(f);
   } else if(c == '(') {
     return _read_list(f);
   } else if(c == '\'') {
-    return cons(sym_atom("quote"), read(f));
+    return cons(sym("quote"), read(f));
   }
   return read(f);
 }

@@ -25,18 +25,22 @@ Cons* cons(void* car, void* cdr) {
   return c;
 }
 
+Cons* empty_cons() {
+  return cons(NULL, NULL);
+}
+
 Atom* _make_atom() {
   return (Atom*)malloc(sizeof(Atom));
 }
 
-Atom* int_atom(int ival) {
+Atom* integer(int ival) {
   Atom* a = _make_atom();
   a->type = INT;
   a->v.ival = ival;
   return a;
 }
 
-Atom* sym_atom(char *s) {
+Atom* sym(char *s) {
   Atom* a = _make_atom();
   a->type = SYMBOL;
   int len = strlen(s);
@@ -48,13 +52,19 @@ Atom* sym_atom(char *s) {
 
 /* Boolean Initializers *********/
 
-Atom _TRUE = { SYMBOL, 84, { "T" }};
-Cons _FALSE = { CONS, NULL, NULL };
+Atom _TRUE = { SYMBOL, 32745841285307182, {"true"}};
+Atom _FALSE = { SYMBOL, 7272854437576874467, {"false"}};
+Atom _NIL = { SYMBOL, 473362056113, {"nil"}};
 void *TRUE = (void*)&_TRUE;
 void *FALSE = (void*)&_FALSE;
+void *NIL = (void*)&_NIL;
 
 enum types type(void* expr) {
   return ((Type*)expr)->type;
+}
+
+int truthy(void* x) {
+  return (x != NIL) && (x != FALSE);
 }
 
 /* Equality ****************/
@@ -91,17 +101,28 @@ void* equal(void* x, void* y) {
 }
 
 void rfree(void* x) {
-  switch(type(x)) {
-  case INT:
-    /* no members to free */
-    break;
-  case SYMBOL:
-    free(SVAL(x));
-    break;
-  case CONS:
-    rfree(CAR(x));
-    rfree(CDR(x));
-    break;
+  if ((x != NIL) &&
+      (x != TRUE) &&
+      (x != FALSE) &&
+      (x != NULL)) {
+    switch(type(x)) {
+    case SPECIAL:
+      /* can't be freed */      
+      return;
+    case FUNCTION:
+      /* TODO */
+      return;
+    case INT:
+      /* no members to free */
+      break;
+    case SYMBOL:
+      free(SVAL(x));
+      break;
+    case CONS:
+      rfree(CAR(x));
+      rfree(CDR(x));
+      break;
+    }
+    free(x);
   }
-  free(x);
 }

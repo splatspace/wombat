@@ -3,26 +3,32 @@
 #include "print.h"
 
 void print(void* form) {
-  if(form) {
-    switch(type(form)) {
-    case INT:
-      printf("%d", IVAL(form));
-      break;
-    case SYMBOL:
-      printf("%s", SVAL(form));
-      break;
-    case CONS:
-      {
-        printf("(");
-        print(CAR(form));
+  switch(type(form)) {
+  case INT:
+    printf("%d", IVAL(form));
+    break;
+  case SYMBOL:
+    printf("%s", SVAL(form));
+    break;
+  case SPECIAL:
+    printf("#<special:%s>", ((Special*)form)->name);
+    break;
+  case FUNCTION:
+    printf("#<function>");
+    break;
+  case CONS:
+    {
+      printf("(");
 
-        if(CDR(form))
-          printf(" ");
+      if(CAR(form)) print(CAR(form));
 
-        print(CDR(form));
-        printf(")");
-        break;
+      if(CDR(form)) {
+        printf(" ");
+        print(CDR(form));        
       }
+
+      printf(")");
+      break;
     }
   }
 }
