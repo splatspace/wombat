@@ -53,6 +53,10 @@ int main(int argc, char *argv[]) {
   printf("Environment:\n");
   print_form(env);
   printf("\n-------\n");
+  printf("Sizes:\n\tint = %d\n\tlong = %d\n\tuint8_t = %d\n\tuint16_t = %d\n",
+      sizeof(int), sizeof(long), sizeof(uint8_t), sizeof(uint16_t));
+  printf("hash(\"true\")\t=>\t%lu\nhash(\"false\")\t=>\t%lu\nhash(\"nil\")\t=>\t%lu\n",
+      hash("true"), hash("false"), hash("nil"));
 
   eval(&env, cons(sym("eq"), cons(integer(1), integer(2))));
   

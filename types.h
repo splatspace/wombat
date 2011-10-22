@@ -64,4 +64,6 @@ void rfree(void* x);
 #define HASHCODE(x) ((Atom*)x)->hashcode
 #define PRINT_TYPE(x) printf("type: %s\n", type(x) == CONS ? "CONS" : type(x) == INT ? "INT" : "SYMBOL");
 
+unsigned long hash(char *str);
+
 #endif

@@ -5,15 +5,17 @@
 /* Utilities *******************************/
 
 /* sdbm hash, http://www.cse.yorku.ca/~oz/hash.html */
-unsigned long hash(char *str) {
-  unsigned long hash = 0;
+unsigned long hash(char *str)
+{
+  unsigned long hash = 5381;
   int c;
 
-  while ((c = *str++))
-    hash = c + (hash << 6) + (hash << 16) - hash;
+  while (c = *str++)
+    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
   return hash;
 }
+
 
 /* Type Initializers *******************/
 
@@ -52,9 +54,9 @@ Atom* sym(char *s) {
 
 /* Boolean Initializers *********/
 
-Atom _TRUE = { SYMBOL, 32745841285307182, {"true"}};
-Atom _FALSE = { SYMBOL, 7272854437576874467, {"false"}};
-Atom _NIL = { SYMBOL, 473362056113, {"nil"}};
+Atom _TRUE = { SYMBOL, 2090770405, {"true"}};
+Atom _FALSE = { SYMBOL, 258723568, {"false"}};
+Atom _NIL = { SYMBOL, 193500360, {"nil"}};
 void *TRUE = (void*)&_TRUE;
 void *FALSE = (void*)&_FALSE;
 void *NIL = (void*)&_NIL;
