@@ -49,8 +49,8 @@ void _gobble_whitespace(FILE* f) {
 
 void* _read_list(FILE* f) {
   char c;
-  Cons* list = cons(NULL,NULL);
-  Cons* cell = list;
+  Cons *list, *cell;
+  list = cell = empty();
   void* form;
   while ((c = getc(f)) != ')'){
     ungetc(c, f);

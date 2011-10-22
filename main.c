@@ -9,27 +9,50 @@
 #include "alist.h"
 #include "arduino_io.h"
 
-void* car(void** env, void* args) {
-  return CAR(CONS(args));
+void* car(void** env, void* expr) {
+  return CAR(CONS(expr));
 }
 
-void* cdr(void** env, void* args) {
-  return CDR(CONS(args));
+void* cdr(void** env, void* expr) {
+  return CDR(CONS(expr));
 }
 
 void* quote(void** env, void* expr) {
   return expr;
 }
-void* eq(void** env, void* args) {
-  return equal(CAR(CONS(args)), CDR(CONS(args)));
+void* eq(void** env, void* expr) {
+  return equal(CAR(expr), CDR(expr));
 }
 
-void* eval(void** env, void* args) {
-  switch(type(args)) {
+void* eval(void** env, void* expr) {
+  void *op, *arg, *args;
+
+  switch(type(expr)) {
+  case CONS:
+    if (!CAR(expr) && !CDR(expr)) {
+      return expr;
+    } else {
+      op = get(*env, CAR(expr));
+      args = CDR(expr);
+      while((args)) {
+        arg = CAR(args);
+        printf("arg: ");
+        print_form(arg);
+        printf("\n");
+        args = CDR(args) ;
+      }
+      switch(type(op)) {
+      case SPECIAL:
+        return(expr);
+        /* return SPECIAL(op)->fn(*env, list); */
+      default:
+        return expr;
+      }
+    }
   case SYMBOL:
-    return get(*env, args);
+    return get(*env, expr);
   default:
-    return args;
+    return expr;
   }
 }
 
@@ -38,27 +61,32 @@ int main(int argc, char *argv[]) {
   ARDUINO_INIT_IO(9600);
 
   /* populate env with special forms */
-  void *env = empty_cons();
-  Special Car = { SPECIAL, "car", car };
-  Special Cdr = { SPECIAL, "cdr", cdr };
-  Special Quote = { SPECIAL, "quote", quote };
-  Special Eq = { SPECIAL, "eq", eq };
-  Special Eval = { SPECIAL, "eval", eval };  
+  void *env = empty();
+  Special Car = { SPECIAL, "car", &car };
+  Special Cdr = { SPECIAL, "cdr", &cdr };
+  Special Quote = { SPECIAL, "quote", &quote };
+  Special Eq = { SPECIAL, "eq", &eq };
+  Special Eval = { SPECIAL, "eval", &eval };
   assoc(&env, sym("car"), (void*)&Car);
   assoc(&env, sym("cdr"), (void*)&Cdr);
   assoc(&env, sym("quote"), (void*)&Quote);
   assoc(&env, sym("eq"), (void*)&Eq);
-  assoc(&env, sym("eval"), (void*)&Eval);      
+  assoc(&env, sym("eval"), (void*)&Eval);
 
-  printf("Environment:\n");
-  print_form(env);
-  printf("\n-------\n");
-  printf("Sizes:\n\tint = %d\n\tlong = %d\n\tuint8_t = %d\n\tuint16_t = %d\n",
-      sizeof(int), sizeof(long), sizeof(uint8_t), sizeof(uint16_t));
-  printf("hash(\"true\")\t=>\t%lu\nhash(\"false\")\t=>\t%lu\nhash(\"nil\")\t=>\t%lu\n",
-      hash("true"), hash("false"), hash("nil"));
+  print_form(cons(sym("eq"), cons(integer(1), integer(2))));
+  printf("\n");
+  print_form(eval(&env, cons(sym("eq"), cons(integer(2), integer(3)))));
+  printf("\n");
 
-  eval(&env, cons(sym("eq"), cons(integer(1), integer(2))));
-  
+  printf("\n");
+  print_form(eval(&env, cons(sym("eq"), cons(integer(1), cons(integer(2), integer(3))))));
+  printf("\n");
+
+  while(1) {
+    printf("=> ");
+    print_form(read_form(stdin));
+    printf("\n");
+  }
+
   return 0;
 }

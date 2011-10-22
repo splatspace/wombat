@@ -21,7 +21,7 @@ typedef struct {
 typedef struct special {
   enum types type;
   char *name;
-  void *fn;
+  void *(*fn)(void **env, void *expr);
 } Special;
 
 typedef struct function {
@@ -46,7 +46,7 @@ extern void *NIL;
 
 enum types type(void* expr);
 Cons* cons(void* car, void* cdr);
-Cons* empty_cons();
+Cons* empty();
 Atom* integer(int ival);
 Atom* sym(char *s);
 int truthy(void* x);
@@ -59,6 +59,7 @@ void rfree(void* x);
 #define CAR(x)  ((Cons*)x)->car
 #define CDR(x)  ((Cons*)x)->cdr
 #define ATOM(x) ((Atom*)x)
+#define SPECIAL(x) ((Special*)x)
 #define IVAL(x) ((Atom*)x)->v.ival
 #define SVAL(x) ((Atom*)x)->v.sval
 #define HASHCODE(x) ((Atom*)x)->hashcode
