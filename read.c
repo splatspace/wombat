@@ -21,7 +21,7 @@ void* read_int(FILE* f) {
       break;
     }
   }
-  return (void*)i(atoi(buf));
+  return (void*)int_atom(atoi(buf));
 }
 
 void* read_symbol(FILE *f) {
@@ -37,11 +37,11 @@ void* read_symbol(FILE *f) {
       break;
     }
   }
-  return (void*)s(buf);
+  return (void*)sym_atom(buf);
 }
 
 int is_whitespace(char c) {
-  return isblank(c);
+  return isspace(c);
 }
 
 void gobble_whitespace(FILE* f) {
@@ -58,7 +58,6 @@ void* read_list(FILE* f) {
   while ((c = getc(f)) != ')'){
     ungetc(c, f);
     form = read(f);
-    /* T(form); */
     if(CAR(cell) && !CDR(cell)) {
       cell->cdr = form;
     } else if (CAR(cell) && CDR(cell)){
@@ -84,7 +83,7 @@ void* read(FILE* f) {
   } else if(c == '(') {
     return read_list(f);
   } else if(c == '\'') {
-    return cons(s("quote"), read(f));
+    return cons(sym_atom("quote"), read(f));
   }
   return read(f);
 }

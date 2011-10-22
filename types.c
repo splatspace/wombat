@@ -16,8 +16,7 @@ unsigned long hash(char *str) {
   return hash;
 }
 
-
-/* TYPES *******************************/
+/* TYPE INITIALIZERS *******************/
 
 Cons* cons(void* car, void* cdr) {
   Cons* c = (Cons*)malloc(sizeof(Cons));
@@ -27,19 +26,19 @@ Cons* cons(void* car, void* cdr) {
   return c;
 }
 
-Atom* make_atom() {
+Atom* _make_atom() {
   return (Atom*)malloc(sizeof(Atom));
 }
 
-Atom* i(int ival) {
-  Atom* a = make_atom();
+Atom* int_atom(int ival) {
+  Atom* a = _make_atom();
   a->type = INT;
   a->v.ival = ival;
   return a;
 }
 
-Atom* s(char *s) {
-  Atom* a = make_atom();
+Atom* sym_atom(char *s) {
+  Atom* a = _make_atom();
   a->type = SYMBOL;
   int len = strlen(s);
   a->v.sval = (char*)malloc(sizeof(char)*(len+1));
@@ -48,8 +47,53 @@ Atom* s(char *s) {
   return a;
 }
 
+/* BOOLEAN INITIALIZERS *********/
+/* TRUE and FALSE are externs in types.h. */
+
+Atom _TRUE = { SYMBOL, 84, { "T" }};
+Cons _FALSE = { CONS, NULL, NULL };
+void *TRUE = (void*)&_TRUE;
+void *FALSE = (void*)&_FALSE;
+
+enum types type(void* expr) {
+  return ((Type*)expr)->type;
+}
+
+/* EQUALITY ****************/
+
+void* _eq(void* x, void* y) {
+  if (x == y) {
+    return TRUE;
+  } else {
+    switch(type(x)) {
+    case INT:
+      return (type(y) != INT)
+        ? FALSE
+        : (IVAL(x) == IVAL(y))
+          ? TRUE
+          : FALSE;
+    case SYMBOL:
+      return (type(y) != SYMBOL)
+        ? FALSE
+        : (HASHCODE(x) == HASHCODE(y))
+          ? TRUE
+          : FALSE;
+    case CONS:
+      return (type(y) != CONS)
+        ? FALSE
+        : _eq(CAR(x), CAR(y))
+          ? _eq(CDR(x), CDR(y))
+            ? TRUE
+            : FALSE
+          : FALSE;
+    default:
+      return FALSE;
+    }
+  }
+}
+
 void rfree(void* x) {
-  switch(TYPE(x)) {
+  switch(type(x)) {
   case INT:
     /* no members to free */
     break;

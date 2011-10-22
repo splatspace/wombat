@@ -7,7 +7,7 @@
 
 void print(void* x) {
   if(x) {
-    switch(TYPE(x)) {
+    switch(type(x)) {
     case INT:
       printf("%d", IVAL(x));
       break;

@@ -9,28 +9,20 @@
 
 /* SPECIAL FORMS *******************************/
 
-void* car(void* arglist) {
-  if(CONS_P(arglist)) {
-    return CONS(arglist)->car;
-  } else {
-    fprintf(stderr, "Can't get car of atom:\n");
-    print(arglist);
-    return NULL;
-  }
+void* car(void* args) {
+  return CAR(CONS(args));
 }
 
-void* cdr(void* arglist) {
-  if(CONS_P(arglist)) {
-    return CONS(arglist)->cdr;
-  } else {
-    fprintf(stderr, "Can't get cdr of atom:\n");
-    print(arglist);
-    return NULL;
-  }
+void* cdr(void* args) {
+  return CDR(CONS(args));
 }
 
 void* quote(void* expr) {
   return expr;
+}
+
+void* eq(void* args) {
+  return _eq(CAR(CONS(args)), CDR(CONS(args)));
 }
 
 int main(int argc, char *argv[]) {

@@ -1,41 +1,46 @@
 /* LISP TYPES *******************************/
 
-enum type { CONS, SYMBOL, INT };
+enum types { CONS, SYMBOL, INT };
 
 typedef struct {
-  enum type type;
+  enum types type;
 } Type;
 
 typedef struct {
-  enum type type;
+  enum types type;
   unsigned long hashcode;
   union Value {
-    int ival;
     char *sval;
+    int ival;
   } v;
 } Atom;
 
 typedef struct cons {
-  enum type type;
+  enum types type;
   void *car;
   void *cdr;
 } Cons;
 
+/* BOOLEANS **********************************/
+
+extern void *TRUE;
+extern void *FALSE;
+
+/* TYPE HELPERS ******************************/
+
+enum types type(void* expr);
+Cons* cons(void* car, void* cdr);
+Atom* int_atom(int ival);
+Atom* sym_atom(char *s);
+void* _eq(void* x, void* y);
+void rfree(void* x);
+
 /* TYPE MACROS *******************************/
 
-#define TYPE(x) ((Type*)x)->type
 #define CONS(x) ((Cons*)x)
 #define CAR(x)  ((Cons*)x)->car
 #define CDR(x)  ((Cons*)x)->cdr
 #define ATOM(x) ((Atom*)x)
 #define IVAL(x) ((Atom*)x)->v.ival
 #define SVAL(x) ((Atom*)x)->v.sval
-#define CONS_P(x) TYPE(x) == CONS ? 1 : 0
-#define SYMBOL_P(x) TYPE(x) == SYMBOL ? 1 : 0
-#define INT_P(x) TYPE(x) == INT ? 1 : 0
-#define PRINT_TYPE(x) printf("type: %s\n", TYPE(x) == CONS ? "CONS" : TYPE(x) == INT ? "INT" : "SYMBOL");
-
-Cons* cons(void* car, void* cdr);
-Atom* i(int ival);
-Atom* s(char *s);
-void rfree(void* x);
+#define HASHCODE(x) ((Atom*)x)->hashcode
