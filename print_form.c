@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "types.h"
-#include "print.h"
+#include "print_form.h"
 
-void print(void* form) {
+/* PRINTING *******************************/
+void print_form(void* form) {
   switch(type(form)) {
   case INT:
     printf("%d", IVAL(form));
@@ -20,11 +21,11 @@ void print(void* form) {
     {
       printf("(");
 
-      if(CAR(form)) print(CAR(form));
+      if(CAR(form)) print_form(CAR(form));
 
       if(CDR(form)) {
         printf(" ");
-        print(CDR(form));        
+        print_form(CDR(form));        
       }
 
       printf(")");

@@ -3,9 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include "types.h"
-#include "read.h"
-#include "print.h"
+
+#include "read_form.h"
+#include "print_form.h"
 #include "alist.h"
+
+#ifdef ARDUINO
+#include "arduino_io.h"
+#endif
 
 void* car(void** env, void* expr) {
   return CAR(CONS(expr));
@@ -18,7 +23,6 @@ void* cdr(void** env, void* expr) {
 void* quote(void** env, void* expr) {
   return expr;
 }
-
 void* eq(void** env, void* expr) {
   return equal(CAR(expr), CDR(expr));
 }
@@ -36,7 +40,7 @@ void* eval(void** env, void* expr) {
       while((args)) {
         arg = CAR(args);
         printf("arg: ");
-        print(arg);
+        print_form(arg);
         printf("\n");
         args = CDR(args) ;
       }
@@ -57,7 +61,12 @@ void* eval(void** env, void* expr) {
 
 int main(int argc, char *argv[]) {
 
-  VOID *env = empty();
+#ifdef ARDUINO
+  ARDUINO_INIT_IO(9600);
+#endif
+
+  /* populate env with special forms */
+  void *env = empty();
   Special Car = { SPECIAL, "car", &car };
   Special Cdr = { SPECIAL, "cdr", &cdr };
   Special Quote = { SPECIAL, "quote", &quote };
@@ -69,18 +78,18 @@ int main(int argc, char *argv[]) {
   assoc(&env, sym("eq"), (void*)&Eq);
   assoc(&env, sym("eval"), (void*)&Eval);
 
-  print(cons(sym("eq"), cons(integer(1), integer(2))));
+  print_form(cons(sym("eq"), cons(integer(1), integer(2))));
   printf("\n");
-  print(eval(&env, cons(sym("eq"), cons(integer(2), integer(3)))));
+  print_form(eval(&env, cons(sym("eq"), cons(integer(2), integer(3)))));
   printf("\n");
 
   printf("\n");
-  print(eval(&env, cons(sym("eq"), cons(integer(1), cons(integer(2), integer(3))))));
+  print_form(eval(&env, cons(sym("eq"), cons(integer(1), cons(integer(2), integer(3))))));
   printf("\n");
 
   while(1) {
     printf("=> ");
-    print(read(stdin));
+    print_form(read_form(stdin));
     printf("\n");
   }
 
