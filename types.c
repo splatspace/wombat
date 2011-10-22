@@ -17,7 +17,7 @@ unsigned long hash(char *str) {
 
 /* Type Initializers *******************/
 
-Cons* cons(void* car, void* cdr) {
+Cons* _cons(void* car, void* cdr) {
   Cons* c = (Cons*)malloc(sizeof(Cons));
   c->type = CONS;
   c->car = car;
@@ -25,7 +25,27 @@ Cons* cons(void* car, void* cdr) {
   return c;
 }
 
-Cons* empty_cons() {
+Cons* cons(void* car, void* cdr) {
+  Cons* c;
+  if(cdr) {
+    if(type(cdr) == CONS) {
+      c = (Cons*)cdr;
+      if(c->car && !c->cdr) {
+        c->cdr = c->car;
+        c->car = car;
+        return c;
+      } else if (c->car && c->cdr){
+        return _cons(car, c);
+      } else {
+        c->car = car;
+        return c;
+      }
+    }
+  }
+  return _cons(car, cdr);
+}
+
+Cons* empty() {
   return cons(NULL, NULL);
 }
 
@@ -107,7 +127,7 @@ void rfree(void* x) {
       (x != NULL)) {
     switch(type(x)) {
     case SPECIAL:
-      /* can't be freed */      
+      /* can't be freed */
       return;
     case FUNCTION:
       /* TODO */
