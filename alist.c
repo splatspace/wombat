@@ -3,17 +3,17 @@
 #include "alist.h"
 #include "print.h"
 
-void* get(void *l, void* k) {
+void* get(void *alist, void* k) {
   void *pair;
-  if(CAR(l)) {
-    while((pair = CAR(l))) {
+  if(CAR(alist)) {
+    while((pair = CAR(alist))) {
       if(truthy(equal(CAR(pair), k))) return CDR(pair);
-      if(!(l = CDR(l))) break;
+      if(!(alist = CDR(alist))) break;
     }
   }
   return NIL;
 }
 
-void assoc(void **l, void* k, void* v) {
-  *l = cons(cons(k, v), *l);
+void assoc(void **alist, void* k, void* v) {
+  *alist = cons(cons(k, v), *alist);
 }
