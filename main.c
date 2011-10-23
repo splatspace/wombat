@@ -61,7 +61,6 @@ void* eval(void** env, void* expr) {
 
 int main(int argc, char *argv[]) {
 
-=======
 #ifdef ARDUINO
   ARDUINO_INIT_IO(9600);
 #endif
