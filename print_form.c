@@ -19,18 +19,16 @@ void print_form(void* form) {
     printf("#<function>");
     break;
   case CONS:
-    {
-      printf("(");
-
-      if(CAR(form)) print_form(CAR(form));
-
-      if(CDR(form)) {
-        printf(" ");
-        print_form(CDR(form));        
+    printf("(");
+    do {
+      if(CAR(form)) {
+        print_form(CAR(form));
+        if(CDR(form)) {
+          printf(" ");
+        }
       }
-
-      printf(")");
-      break;
-    }
+    } while((form = CDR(form)));
+    printf(")");
+    break;
   }
 }

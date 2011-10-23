@@ -5,32 +5,12 @@
 
 /* Type Initializers *******************/
 
-Cons* _cons(void* car, void* cdr) {
+Cons* cons(void* car, void* cdr) {
   Cons* c = (Cons*)malloc(sizeof(Cons));
   c->type = CONS;
   c->car = car;
   c->cdr = cdr;
   return c;
-}
-
-Cons* cons(void* car, void* cdr) {
-  Cons* c;
-  if(cdr) {
-    if(type(cdr) == CONS) {
-      c = (Cons*)cdr;
-      if(c->car && !c->cdr) {
-        c->cdr = c->car;
-        c->car = car;
-        return c;
-      } else if (c->car && c->cdr){
-        return _cons(car, c);
-      } else {
-        c->car = car;
-        return c;
-      }
-    }
-  }
-  return _cons(car, cdr);
 }
 
 Cons* empty() {

@@ -47,22 +47,20 @@ void _gobble_whitespace(FILE* f) {
   ungetc(c, f);
 }
 
+void* append(void* tail, void* form) {
+  void* new_tail = empty();
+  CAR(new_tail) = form;
+  CDR(tail) = new_tail;
+  return new_tail;
+}
+
 void* _read_list(FILE* f) {
   char c;
   Cons *list, *cell;
   list = cell = empty();
-  void* form;
   while ((c = getc(f)) != ')'){
     ungetc(c, f);
-    form = read_form(f);
-    if(CAR(cell) && !CDR(cell)) {
-      cell->cdr = form;
-    } else if (CAR(cell) && CDR(cell)){
-      cell->cdr = cons(cell->cdr, form);
-      cell = cell->cdr;
-    } else {
-      cell->car = form;
-    }
+    cell = append(cell, read_form(f));
     _gobble_whitespace(f);
   }
   return (void*)list;
