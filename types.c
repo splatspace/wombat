@@ -4,7 +4,7 @@
 
 /* Utilities *******************************/
 
-/* sdbm hash, http://www.cse.yorku.ca/~oz/hash.html */
+/* djb2 hash, http://www.cse.yorku.ca/~oz/hash.html */
 unsigned long hash(char *str)
 {
   unsigned long hash = 5381;
