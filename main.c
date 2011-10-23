@@ -43,8 +43,6 @@ void* eval(void** env, void* expr) {
       }
 
       if(type(CAR(expr)) != SYMBOL) {
-        print_form(expr);
-        PRINT_TYPE(CAR(expr));
         fprintf(stderr, "Error: Only symbols can be in function position.\n");
         return NIL;
       }
