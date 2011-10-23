@@ -48,25 +48,20 @@ void _gobble_whitespace(FILE* f) {
 }
 
 void* _read_list(FILE* f) {
-  char c;
-  Cons *list, *cell;
-  list = cell = NIL;
-  while ((c = getc(f)) != ')'){
-    if(c == '.') {
-      cell->cdr = read_form(f);
-    } else {
-      ungetc(c, f);
-      cell = append(cell, read_form(f));
-      _gobble_whitespace(f);
-    }
-  }
-
-  if(CDR(list)) {
-    return (void*)CDR(list);
+  _gobble_whitespace(f);
+  char c = getc(f);
+  if (c == ')')
+    return NIL;
+  else if (c == '.') {
+    _gobble_whitespace(f);
+    return read_form(f);
   } else {
-    return (void*)list;
+    ungetc(c, f);
+    void *car = read_form(f);
+    void *cdr = _read_list(f);
+    
+    return cons(car, cdr);
   }
-
 }
 
 void* read_form(FILE* f) {

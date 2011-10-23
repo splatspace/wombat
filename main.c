@@ -13,11 +13,11 @@
 #endif
 
 void* car(void** env, void* expr) {
-  return CAR(CONS(expr));
+  return CAR(expr);
 }
 
 void* cdr(void** env, void* expr) {
-  return CDR(CONS(expr));
+  return CDR(expr);
 }
 
 void* quote(void** env, void* expr) {
@@ -38,7 +38,7 @@ void* eval(void** env, void* expr) {
   case CONS:
     {
       /* The empty list is self-quoting. */
-      if(!CAR(expr) && !CDR(expr)) {
+      if(expr == NIL) {
         return expr;
       }
 
