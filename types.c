@@ -26,6 +26,13 @@ Cons* cons(void* car, void* cdr) {
   return c;
 }
 
+void* append(void* tail, void* form) {
+  void* new_tail = empty();
+  CAR(new_tail) = form;
+  CDR(tail) = new_tail;
+  return new_tail;
+}
+
 Cons* empty() {
   return cons(NULL, NULL);
 }

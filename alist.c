@@ -6,12 +6,12 @@
 void* get(void *alist, void* k) {
   void *pair;
   if(CAR(alist)) {
-    while((pair = CAR(alist))) {
-      if(truthy(equal(CAR(pair), k))) return CDR(pair);
-      if(!(alist = CDR(alist))) break;
-    }
+    if(equal(CAR(CAR(alist)), k)) return CAR(alist);
+  } else if(CDR(alist)) {
+    return get(alist, k);
+  } else {
+    return NIL;
   }
-  return NIL;
 }
 
 void assoc(void **alist, void* k, void* v) {

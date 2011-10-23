@@ -49,6 +49,7 @@ enum types type(void* expr);
 
 /* Lists */
 Cons* cons(void* car, void* cdr);
+void* append(void* tail, void* form);
 Cons* empty();
 
 /* Numerics */

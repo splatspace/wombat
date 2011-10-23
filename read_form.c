@@ -47,21 +47,18 @@ void _gobble_whitespace(FILE* f) {
   ungetc(c, f);
 }
 
-void* append(void* tail, void* form) {
-  void* new_tail = empty();
-  CAR(new_tail) = form;
-  CDR(tail) = new_tail;
-  return new_tail;
-}
-
 void* _read_list(FILE* f) {
   char c;
   Cons *list, *cell;
   list = cell = empty();
   while ((c = getc(f)) != ')'){
-    ungetc(c, f);
-    cell = append(cell, read_form(f));
-    _gobble_whitespace(f);
+    if(c == '.') {
+      cell->cdr = read_form(f);
+    } else {
+      ungetc(c, f);
+      cell = append(cell, read_form(f));
+      _gobble_whitespace(f);
+    }
   }
   return (void*)list;
 }
