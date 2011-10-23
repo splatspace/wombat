@@ -115,6 +115,8 @@ void* eval(void** env, void* expr) {
     assoc(&env, sym("false"), FALSE);
     assoc(&env, sym("true"), TRUE);
 
+    assoc(&env, sym("ENV"), env);
+
     while(1) {
       printf("=> ");
       print_form(eval(env, read_form(stdin)));
