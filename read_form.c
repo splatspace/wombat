@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "types.h"
-#include "read.h"
+#include "read_form.h"
 
 void* _read_integer(FILE* f) {
   char buf[17]; /* 16 digit limit on numbers */
@@ -54,7 +54,7 @@ void* _read_list(FILE* f) {
   void* form;
   while ((c = getc(f)) != ')'){
     ungetc(c, f);
-    form = read(f);
+    form = read_form(f);
     if(CAR(cell) && !CDR(cell)) {
       cell->cdr = form;
     } else if (CAR(cell) && CDR(cell)){
@@ -68,7 +68,7 @@ void* _read_list(FILE* f) {
   return (void*)list;
 }
 
-void* read(FILE* f) {
+void* read_form(FILE* f) {
   char c = getc(f);
   if(isdigit(c)) {
     ungetc(c, f);
@@ -79,7 +79,7 @@ void* read(FILE* f) {
   } else if(c == '(') {
     return _read_list(f);
   } else if(c == '\'') {
-    return cons(sym("quote"), read(f));
+    return cons(sym("quote"), read_form(f));
   }
-  return read(f);
+  return read_form(f);
 }

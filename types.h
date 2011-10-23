@@ -1,3 +1,6 @@
+#ifndef _UBERLISP_TYPES_H
+#define _UBERLISP_TYPES_H
+
 /* Lisp Types *******************************/
 
 enum types { SPECIAL, FUNCTION, SYMBOL, CONS, INT };
@@ -61,3 +64,7 @@ void rfree(void* x);
 #define SVAL(x) ((Atom*)x)->v.sval
 #define HASHCODE(x) ((Atom*)x)->hashcode
 #define PRINT_TYPE(x) printf("type: %s\n", type(x) == CONS ? "CONS" : type(x) == INT ? "INT" : "SYMBOL");
+
+unsigned long hash(char *str);
+
+#endif
