@@ -24,12 +24,12 @@ void print_form(void* form) {
       if(CAR(form)) {
         print_form(CAR(form));
         if(CDR(form)) {
-          if(type(CDR(form)) != CONS) {
+          if(type(CDR(form)) == CONS) {
+            printf(" ");
+          } else {
             printf(" . ");
             print_form(CDR(form));
             break;
-          } else {
-            printf(" ");
           }
         }
       }
