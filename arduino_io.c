@@ -1,4 +1,3 @@
-/* $CSK: lesson5.c,v 1.3 2009/05/17 06:22:44 ckuethe Exp $ */
 /*
  * Copyright (c) 2008 Chris Kuethe <chris.kuethe@gmail.com>
  *
@@ -13,6 +12,12 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/* 
+ * Modified from the original by Jon Distad and Alan Dipert
+ *
+ * Source: https://www.mainframe.cx/~ckuethe/avr-c-tutorial/lesson5.c
  */
 
 #include <avr/io.h>
