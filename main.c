@@ -78,15 +78,6 @@ int main(int argc, char *argv[]) {
   assoc(&env, sym("eq"), (void*)&Eq);
   assoc(&env, sym("eval"), (void*)&Eval);
 
-  print_form(cons(sym("eq"), cons(integer(1), integer(2))));
-  printf("\n");
-  print_form(eval(&env, cons(sym("eq"), cons(integer(2), integer(3)))));
-  printf("\n");
-
-  printf("\n");
-  print_form(eval(&env, cons(sym("eq"), cons(integer(1), cons(integer(2), integer(3))))));
-  printf("\n");
-
   while(1) {
     printf("=> ");
     print_form(read_form(stdin));

@@ -2,7 +2,8 @@
 #include "types.h"
 #include "print_form.h"
 
-/* PRINTING *******************************/
+/* Printing *******************************/
+
 void print_form(void* form) {
   switch(type(form)) {
   case INT:

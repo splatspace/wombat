@@ -36,7 +36,7 @@ typedef struct cons {
   void *cdr;
 } Cons;
 
-/* Booleans **********************************/
+/* Booleans and Nil **************************/
 
 extern void *TRUE;
 extern void *FALSE;
@@ -44,13 +44,24 @@ extern void *NIL;
 
 /* Type Helpers ******************************/
 
+/* Gets an object's type */
 enum types type(void* expr);
+
+/* Lists */
 Cons* cons(void* car, void* cdr);
 Cons* empty();
+
+/* Numerics */
 Atom* integer(int ival);
+
+/* Symbols */
 Atom* sym(char *s);
+
+/* Equality */
 int truthy(void* x);
 void* equal(void* x, void* y);
+
+/* Management */
 void rfree(void* x);
 
 /* Type Macros *******************************/
@@ -64,7 +75,5 @@ void rfree(void* x);
 #define SVAL(x) ((Atom*)x)->v.sval
 #define HASHCODE(x) ((Atom*)x)->hashcode
 #define PRINT_TYPE(x) printf("type: %s\n", type(x) == CONS ? "CONS" : type(x) == INT ? "INT" : "SYMBOL");
-
-unsigned long hash(char *str);
 
 #endif

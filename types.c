@@ -1,21 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "types.h"
-
-/* Utilities *******************************/
-
-/* sdbm hash, http://www.cse.yorku.ca/~oz/hash.html */
-unsigned long hash(char *str)
-{
-  unsigned long hash = 5381;
-  int c;
-
-  while ((c = *str++))
-    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-  return hash;
-}
-
+#include "util.h"
 
 /* Type Initializers *******************/
 
@@ -68,7 +54,7 @@ Atom* sym(char *s) {
   int len = strlen(s);
   a->v.sval = (char*)malloc(sizeof(char)*(len+1));
   strncpy(a->v.sval, s, len+1);
-  a->hashcode = hash(s);
+  a->hashcode = sdbm_hash(s);
   return a;
 }
 
