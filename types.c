@@ -27,14 +27,10 @@ Cons* cons(void* car, void* cdr) {
 }
 
 void* append(void* tail, void* form) {
-  void* new_tail = empty();
+  void* new_tail = NIL;
   CAR(new_tail) = form;
   CDR(tail) = new_tail;
   return new_tail;
-}
-
-Cons* empty() {
-  return cons(NULL, NULL);
 }
 
 Atom* _make_atom() {
@@ -62,7 +58,7 @@ Atom* sym(char *s) {
 
 Atom _TRUE = { SYMBOL, 2090770405, {"true"}};
 Atom _FALSE = { SYMBOL, 258723568, {"false"}};
-Atom _NIL = { SYMBOL, 193500360, {"nil"}};
+Cons _NIL = { CONS, NULL, NULL };
 void *TRUE = (void*)&_TRUE;
 void *FALSE = (void*)&_FALSE;
 void *NIL = (void*)&_NIL;

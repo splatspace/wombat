@@ -56,7 +56,7 @@ void* eval(void** env, void* expr) {
         if(SPECIAL(op)->argeval) {
           /* Special forms that require argument evaluation */
           args = CDR(expr);
-          eroot = eargs = empty();
+          eroot = eargs = NIL;
           while(1) {
             if(CAR(args)) eargs = append(eargs, eval(env, CAR(args)));
             if(!(args = CDR(args))) break;
@@ -94,7 +94,7 @@ void* eval(void** env, void* expr) {
     ARDUINO_INIT_IO(9600);
 #endif
 
-    void *env = empty();
+    void *env = NIL;
     Special Car = { SPECIAL, 1, "car", &car };
     Special Cdr = { SPECIAL, 1, "cdr", &cdr };
     Special _Cons = { SPECIAL, 1, "cons", &_cons };

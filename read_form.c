@@ -50,7 +50,7 @@ void _gobble_whitespace(FILE* f) {
 void* _read_list(FILE* f) {
   char c;
   Cons *list, *cell;
-  list = cell = empty();
+  list = cell = NIL;
   while ((c = getc(f)) != ')'){
     if(c == '.') {
       cell->cdr = read_form(f);
