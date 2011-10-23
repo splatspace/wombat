@@ -34,7 +34,7 @@ Atom* sym(char *s) {
   int len = strlen(s);
   a->v.sval = (char*)malloc(sizeof(char)*(len+1));
   strncpy(a->v.sval, s, len+1);
-  a->hashcode = sdbm_hash(s);
+  a->hashcode = djb2_hash(s);
   return a;
 }
 

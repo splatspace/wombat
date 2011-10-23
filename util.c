@@ -1,7 +1,6 @@
 /* Utilities *******************************/
 
-/* sdbm hash, http://www.cse.yorku.ca/~oz/hash.html */
-unsigned long sdbm_hash(char *str)
+unsigned long djb2_hash(char *str)
 {
   unsigned long hash = 5381;
   int c;

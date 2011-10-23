@@ -1,1 +1,1 @@
-unsigned long sdbm_hash(char *str);
+unsigned long djb2_hash(char *str);
