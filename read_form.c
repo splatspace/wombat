@@ -60,7 +60,13 @@ void* _read_list(FILE* f) {
       _gobble_whitespace(f);
     }
   }
-  return (void*)list;
+
+  if(CDR(list)) {
+    return (void*)CDR(list);
+  } else {
+    return (void*)list;
+  }
+
 }
 
 void* read_form(FILE* f) {
@@ -74,7 +80,7 @@ void* read_form(FILE* f) {
   } else if(c == '(') {
     return _read_list(f);
   } else if(c == '\'') {
-    return cons(sym("quote"), read_form(f));
+    return cons(sym("quote"), cons(read_form(f), NULL));
   }
   return read_form(f);
 }

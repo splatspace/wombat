@@ -25,13 +25,17 @@ void print_form(void* form) {
         print_form(CAR(form));
         if(CDR(form)) {
           if(type(CDR(form)) == CONS) {
-            printf(" ");
+            if(CAR(CDR(form))) {
+              printf(" ");
+            }
           } else {
             printf(" . ");
             print_form(CDR(form));
             break;
           }
         }
+      } else {
+        /* printf("CAR was empty.\n"); */
       }
     } while((form = CDR(form)));
     printf(")");

@@ -20,13 +20,15 @@ typedef struct {
 
 typedef struct special {
   enum types type;
+  int argeval;
   char *name;
   void *(*fn)(void **env, void *expr);
 } Special;
 
 typedef struct function {
   enum types type;
-  char *name;  
+  int argeval;
+  char *name;
   void *fn;
 } Function;
 
@@ -49,7 +51,7 @@ enum types type(void* expr);
 
 /* Lists */
 Cons* cons(void* car, void* cdr);
-void* append(void* tail, void* form);
+void* append(void* p, void* form);
 Cons* empty();
 
 /* Numerics */
@@ -57,6 +59,7 @@ Atom* integer(int ival);
 
 /* Symbols */
 Atom* sym(char *s);
+unsigned long djb2_hash(char *str);
 
 /* Equality */
 int truthy(void* x);

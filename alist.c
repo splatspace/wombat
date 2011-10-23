@@ -4,11 +4,10 @@
 #include "print_form.h"
 
 void* get(void *alist, void* k) {
-  void *pair;
   if(CAR(alist)) {
-    if(equal(CAR(CAR(alist)), k)) return CAR(alist);
+    return (truthy(equal(CAR(CAR(alist)), k))) ? CDR(CAR(alist)) : get(CDR(alist), k);
   } else if(CDR(alist)) {
-    return get(alist, k);
+    return get(CDR(alist), k);
   } else {
     return NIL;
   }

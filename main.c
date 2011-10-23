@@ -21,68 +21,106 @@ void* cdr(void** env, void* expr) {
 }
 
 void* quote(void** env, void* expr) {
-  return expr;
+  return CAR(expr);
 }
+
 void* eq(void** env, void* expr) {
-  return equal(CAR(expr), CDR(expr));
+  return equal(CAR(expr), CAR(CDR(expr)));
+}
+
+void* _cons(void** env, void* expr) {
+  return cons(CAR(expr), CAR(CDR(expr)));
 }
 
 void* eval(void** env, void* expr) {
-  void *op, *arg, *args;
-
+  void *op, *args, *eroot, *eargs, *sym;
   switch(type(expr)) {
   case CONS:
-    if (!CAR(expr) && !CDR(expr)) {
-      return expr;
-    } else {
-      op = get(*env, CAR(expr));
-      args = CDR(expr);
-      while((args)) {
-        arg = CAR(args);
-        printf("arg: ");
-        print_form(arg);
-        printf("\n");
-        args = CDR(args) ;
-      }
-      switch(type(op)) {
-      case SPECIAL:
-        return(expr);
-        /* return SPECIAL(op)->fn(*env, list); */
-      default:
+    {
+      /* The empty list is self-quoting. */
+      if(!CAR(expr) && !CDR(expr)) {
         return expr;
       }
-    }
-  case SYMBOL:
-    return get(*env, expr);
-  default:
-    return expr;
-  }
-}
 
-int main(int argc, char *argv[]) {
+      if(type(CAR(expr)) != SYMBOL) {
+        print_form(expr);
+        PRINT_TYPE(CAR(expr));
+        fprintf(stderr, "Error: Only symbols can be in function position.\n");
+        return NIL;
+      }
+
+      if ((op = get(env, CAR(expr))) == NIL) {
+        fprintf(stderr, "Error: Symbol '%s' is not defined.\n", SVAL(op));
+        return NIL;
+      }
+
+      if(type(op) == SPECIAL) {
+        if(SPECIAL(op)->argeval) {
+          /* Special forms that require argument evaluation */
+          args = CDR(expr);
+          eroot = eargs = empty();
+          while(1) {
+            if(CAR(args)) eargs = append(eargs, eval(env, CAR(args)));
+            if(!(args = CDR(args))) break;
+          }
+          return SPECIAL(op)->fn(env, CDR(eroot));
+        } else {
+          /* Special forms that do not require argument evaluation */
+          return SPECIAL(op)->fn(env, CDR(expr));
+        }
+      }
+
+      if(type(op) == FUNCTION) {
+        /* TODO */
+      }
+
+      return NIL;
+    }
+    case SYMBOL:
+      if (HASHCODE(expr) == djb2_hash("nil")) {
+        return NIL;
+      } else if ((sym = get(env, expr)) != NIL) {
+        return sym;
+      } else {
+        fprintf(stderr, "Error: Symbol '%s' is not defined.\n", SVAL(expr));
+        return NIL;
+      }
+    default:
+      return expr;
+    }
+  }
+
+  int main(int argc, char *argv[]) {
 
 #ifdef ARDUINO
-  ARDUINO_INIT_IO(9600);
+    ARDUINO_INIT_IO(9600);
 #endif
 
-  /* populate env with special forms */
-  void *env = empty();
-  Special Car = { SPECIAL, "car", &car };
-  Special Cdr = { SPECIAL, "cdr", &cdr };
-  Special Quote = { SPECIAL, "quote", &quote };
-  Special Eq = { SPECIAL, "eq", &eq };
-  Special Eval = { SPECIAL, "eval", &eval };
-  assoc(&env, sym("car"), (void*)&Car);
-  assoc(&env, sym("cdr"), (void*)&Cdr);
-  assoc(&env, sym("quote"), (void*)&Quote);
-  assoc(&env, sym("eq"), (void*)&Eq);
-  assoc(&env, sym("eval"), (void*)&Eval);
+    void *env = empty();
+    Special Car = { SPECIAL, 1, "car", &car };
+    Special Cdr = { SPECIAL, 1, "cdr", &cdr };
+    Special _Cons = { SPECIAL, 1, "cons", &_cons };
+    Special Quote = { SPECIAL, 0, "quote", &quote };
+    Special Eq = { SPECIAL, 1, "eq", &eq };
+    Special Eval = { SPECIAL, 1, "eval", &eval };
 
-  while(1) {
-    printf("=> ");
-    print_form(read_form(stdin));
-    printf("\n");
+    assoc(&env, sym("car"), (void*)&Car);
+    assoc(&env, sym("cdr"), (void*)&Cdr);
+    assoc(&env, sym("cons"), (void*)&_Cons);
+    assoc(&env, sym("quote"), (void*)&Quote);
+    assoc(&env, sym("eq"), (void*)&Eq);
+    assoc(&env, sym("eval"), (void*)&Eval);
+
+    /* NIL handled specially above. */
+    assoc(&env, sym("false"), FALSE);
+    assoc(&env, sym("true"), TRUE);
+
+    while(1) {
+      printf("=> ");
+      print_form(eval(env, read_form(stdin)));
+      /* print_form(read_form(stdin)); */
+      printf("\n");
+    }
+
+    return 0;
   }
-
-  return 0;
-}
