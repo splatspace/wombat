@@ -1,10 +1,10 @@
 # For Arduino Uno. See:
 # http://balau82.wordpress.com/2011/03/29/programming-arduino-uno-in-pure-c/
 
-# Your TTY might be different.  Look for /dev/tty.serial or .modem
+# Your TTY might be different.  Look for /dev/tty.serial, .modem, or USB
 # devices, and set TTY accordingly:
-TTY        = /dev/ttyUSB0
-BAUD       = 57600
+TTY        = /dev/ttyACM0
+BAUD       = 115200
 
 DEVICE     = atmega328p
 CLOCK      = 16000000UL
