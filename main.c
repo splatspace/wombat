@@ -12,29 +12,36 @@
 #include "arduino_io.h"
 #endif
 
-void* car(void** env, void* arglist) {
+void *eval(Cons **env, void *expr);
+
+void* car(Cons** env, void* arglist) {
   return CAR(CAR(arglist));
 }
 
-void* cdr(void** env, void* arglist) {
+void* cdr(Cons** env, void* arglist) {
   return CDR(CAR(arglist));
 }
 
-void* quote(void** env, void* expr) {
+void* quote(Cons** env, void* expr) {
   return CAR(expr);
 }
 
-void* eq(void** env, void* expr) {
+void* eq(Cons** env, void* expr) {
   return equal(CAR(expr), CAR(CDR(expr)));
 }
 
-void* _cons(void** env, void* expr) {
+void* _cons(Cons** env, void* expr) {
   return cons(CAR(expr), CAR(CDR(expr)));
 }
 
-void *eval(void**, void*);
+void *def(Cons **env, void *arglist) {
+  Atom *var = CAR(arglist);
+  Cons *binding = eval(env, CAR(CDR(arglist)));
+  assoc(env, sym(SVAL(var)), binding);
+  return binding;
+}
 
-Cons *eval_list(void **env, Cons *list) {
+Cons *eval_list(Cons **env, Cons *list) {
   if (list == NIL) return list;
 
   void *car = eval(env, CAR(list));
@@ -43,7 +50,7 @@ Cons *eval_list(void **env, Cons *list) {
   return cons(car, cdr);
 }
 
-void *execute_special(void **env, Special *op, Cons *arglist) {
+void *execute_special(Cons **env, Special *op, Cons *arglist) {
   if (op->argeval) {
     return op->fn(env, eval_list(env, arglist));
   } else {
@@ -51,11 +58,11 @@ void *execute_special(void **env, Special *op, Cons *arglist) {
   }
 }
 
-void *eval(void **env, void *expr) {
+void *eval(Cons **env, void *expr) {
   switch (type(expr)) {
     case SYMBOL:
       ; /* GCC is stupid */
-      void *binding = get(env, expr);
+      void *binding = get(*env, expr);
       if (binding != NIL)
         return binding;
       else {
@@ -69,14 +76,18 @@ void *eval(void **env, void *expr) {
 
       void *op = eval(env, CAR(expr));
 
-      if (op == NIL)
+      if (op == NIL) {
+        printf("nil op\n");
         return NIL;
+      }
 
       void *arglist = CDR(expr);
       if(type(op) == SPECIAL)
         return execute_special(env, op, arglist);
-      else
+      else {
+        printf("not special: %d\n", type(op));
         return NIL;
+      }
 
     default:
       return expr;
@@ -89,13 +100,14 @@ void *eval(void **env, void *expr) {
     ARDUINO_INIT_IO(9600);
 #endif
 
-    void *env = NIL;
+    Cons *env = NIL;
     Special Car = { SPECIAL, 1, "car", &car };
     Special Cdr = { SPECIAL, 1, "cdr", &cdr };
     Special _Cons = { SPECIAL, 1, "cons", &_cons };
     Special Quote = { SPECIAL, 0, "quote", &quote };
     Special Eq = { SPECIAL, 1, "eq", &eq };
     Special Eval = { SPECIAL, 1, "eval", &eval };
+    Special Def = { SPECIAL, 0, "def", &def };
 
     assoc(&env, sym("car"), (void*)&Car);
     assoc(&env, sym("cdr"), (void*)&Cdr);
@@ -103,6 +115,7 @@ void *eval(void **env, void *expr) {
     assoc(&env, sym("quote"), (void*)&Quote);
     assoc(&env, sym("eq"), (void*)&Eq);
     assoc(&env, sym("eval"), (void*)&Eval);
+    assoc(&env, sym("def"), (void*)&Def);
 
     /* NIL handled specially above. */
     assoc(&env, sym("false"), FALSE);
@@ -112,7 +125,7 @@ void *eval(void **env, void *expr) {
 
     while(1) {
       printf("=> ");
-      print_form(eval(env, read_form(stdin)));
+      print_form(eval(&env, read_form(stdin)));
       /* print_form(read_form(stdin)); */
       printf("\n");
     }

@@ -18,13 +18,6 @@ typedef struct {
   } v;
 } Atom;
 
-typedef struct special {
-  enum types type;
-  int argeval;
-  char *name;
-  void *(*fn)(void **env, void *expr);
-} Special;
-
 typedef struct function {
   enum types type;
   int argeval;
@@ -37,6 +30,13 @@ typedef struct cons {
   void *car;
   void *cdr;
 } Cons;
+
+typedef struct special {
+  enum types type;
+  int argeval;
+  char *name;
+  void *(*fn)(Cons **env, void *expr);
+} Special;
 
 /* Booleans and Nil **************************/
 
