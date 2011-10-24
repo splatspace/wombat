@@ -12,12 +12,12 @@
 #include "arduino_io.h"
 #endif
 
-void* car(void** env, void* expr) {
-  return CAR(expr);
+void* car(void** env, void* arglist) {
+  return CAR(CAR(arglist));
 }
 
-void* cdr(void** env, void* expr) {
-  return CDR(expr);
+void* cdr(void** env, void* arglist) {
+  return CDR(CAR(arglist));
 }
 
 void* quote(void** env, void* expr) {
@@ -32,61 +32,56 @@ void* _cons(void** env, void* expr) {
   return cons(CAR(expr), CAR(CDR(expr)));
 }
 
-void* eval(void** env, void* expr) {
-  void *op, *args, *eroot, *eargs, *sym;
-  switch(type(expr)) {
-  case CONS:
-    {
-      /* The empty list is self-quoting. */
-      if(expr == NIL) {
-        return expr;
-      }
+void *eval(void**, void*);
 
-      if(type(CAR(expr)) != SYMBOL) {
-        fprintf(stderr, "Error: Only symbols can be in function position.\n");
-        return NIL;
-      }
+Cons *eval_list(void **env, Cons *list) {
+  if (list == NIL) return list;
 
-      if ((op = get(env, CAR(expr))) == NIL) {
-        fprintf(stderr, "Error: Symbol '%s' is not defined.\n", SVAL(op));
-        return NIL;
-      }
+  void *car = eval(env, CAR(list));
+  void *cdr = eval_list(env, CDR(list));
 
-      if(type(op) == SPECIAL) {
-        if(SPECIAL(op)->argeval) {
-          /* Special forms that require argument evaluation */
-          args = CDR(expr);
-          eroot = eargs = NIL;
-          while(1) {
-            if(CAR(args)) eargs = append(eargs, eval(env, CAR(args)));
-            if(!(args = CDR(args))) break;
-          }
-          return SPECIAL(op)->fn(env, CDR(eroot));
-        } else {
-          /* Special forms that do not require argument evaluation */
-          return SPECIAL(op)->fn(env, CDR(expr));
-        }
-      }
+  return cons(car, cdr);
+}
 
-      if(type(op) == FUNCTION) {
-        /* TODO */
-      }
+void *execute_special(void **env, Special *op, Cons *arglist) {
+  if (op->argeval) {
+    return op->fn(env, eval_list(env, arglist));
+  } else {
+    return op->fn(env, arglist);
+  }
+}
 
-      return NIL;
-    }
+void *eval(void **env, void *expr) {
+  switch (type(expr)) {
     case SYMBOL:
-      if (HASHCODE(expr) == djb2_hash("nil")) {
-        return NIL;
-      } else if ((sym = get(env, expr)) != NIL) {
-        return sym;
-      } else {
+      ; /* GCC is stupid */
+      void *binding = get(env, expr);
+      if (binding != NIL)
+        return binding;
+      else {
         fprintf(stderr, "Error: Symbol '%s' is not defined.\n", SVAL(expr));
         return NIL;
       }
+    case CONS:
+      /* The empty list is self quoting */
+      if (expr == NIL)
+        return expr;
+
+      void *op = eval(env, CAR(expr));
+
+      if (op == NIL)
+        return NIL;
+
+      void *arglist = CDR(expr);
+      if(type(op) == SPECIAL)
+        return execute_special(env, op, arglist);
+      else
+        return NIL;
+
     default:
       return expr;
-    }
   }
+}
 
   int main(int argc, char *argv[]) {
 

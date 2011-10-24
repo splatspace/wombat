@@ -75,7 +75,7 @@ void* read_form(FILE* f) {
   } else if(c == '(') {
     return _read_list(f);
   } else if(c == '\'') {
-    return cons(sym("quote"), cons(read_form(f), NULL));
+    return cons(sym("quote"), cons(read_form(f), NIL));
   }
   return read_form(f);
 }
