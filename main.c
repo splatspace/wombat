@@ -41,6 +41,10 @@ void *def(Cons **env, void *arglist) {
   return binding;
 }
 
+void *_eval(Cons **env, void *arglist) {
+  return eval(env, CAR(arglist));
+}
+
 Cons *eval_list(Cons **env, Cons *list) {
   if (list == NIL) return list;
 
@@ -106,7 +110,7 @@ void *eval(Cons **env, void *expr) {
     Special _Cons = { SPECIAL, 1, "cons", &_cons };
     Special Quote = { SPECIAL, 0, "quote", &quote };
     Special Eq = { SPECIAL, 1, "eq", &eq };
-    Special Eval = { SPECIAL, 1, "eval", &eval };
+    Special Eval = { SPECIAL, 1, "eval", &_eval };
     Special Def = { SPECIAL, 0, "def", &def };
 
     assoc(&env, sym("car"), (void*)&Car);
