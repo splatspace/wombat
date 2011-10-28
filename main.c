@@ -26,8 +26,8 @@ void* quote(Cons** env, void* expr) {
   return CAR(expr);
 }
 
-void* eq(Cons** env, void* expr) {
-  return equal(CAR(expr), CAR(CDR(expr)));
+void* eq(Cons **env, void *arglist) {
+  return BOOL(CAR(arglist) == CAR(CDR(arglist)));
 }
 
 void* _cons(Cons** env, void* expr) {
