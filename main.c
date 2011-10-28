@@ -27,6 +27,7 @@ void* quote(Cons** env, void* expr) {
 }
 
 void* eq(Cons **env, void *arglist) {
+  dbg_pf(arglist);
   return BOOL(CAR(arglist) == CAR(CDR(arglist)));
 }
 
