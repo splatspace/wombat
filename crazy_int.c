@@ -27,8 +27,12 @@ void * const COBJED_p;
 #define IS_2BI(val) ((val) & MASK2BI)
 #define IS_3BI(val) ((val) & MASK3BI)
 
-#define TO_2BI(val) (((uint16_t)(val) & (uint16_t)0x3FFF) | MASK2BI)
-#define TO_3BH(val) (((uint16_t)(val))>>4)
+#define TO_6BIT(val) ((uint16_t)(val) & (uint16_t)0x3FFF)
+#define TO_2BI(val) (TO_6BIT(val) | MASK2BI)
+#define TO_3BH(val) (TO_6BIT(((val)>>4)) | MASK3BI)
+#define TO_3BL(val) ((uint8_t)(val))
+
+#define IS_2BI_COMPAT(val) ((val) <= UBER_2BI_MAX && (val) >= UBER_2BI_MIN)
 
 typedef struct {
   uint16_t car;
@@ -59,11 +63,48 @@ Cons *cons_ptr_ptr(uint16_t car, uint16_t cdr) {
 }
 
 void *cons_int_ptr(int32_t car, uint16_t cdr) {
-  if (car <= UBER_2BI_MAX && car >= UBER_2BI_MIN)
+  if (IS_2BI_COMPAT(car))
     return cons_ptr_ptr(TO_2BI(car), cdr);
 
   Cons3 *new_cons = uber_allocate(sizeof(Cons3));
-  new_cons
+  new_cons->car = TO_3BH(car);
+  new_cons->xb = TO_3BL(car);
+  new_cons->cdr = cdr;
+
+  return new_cons;
+}
+
+void *cons_ptr_int(uint16_t car, int32_t cdr) {
+  if (IS_2BI_COMPAT(cdr))
+    return cons_ptr_ptr(car, TO_2BI(cdr));
+
+  Cons3 *new_cons = uber_allocate(sizeof(Cons3));
+  new_cons->car = car;
+  new_cons->cdr = TO_3BH(cdr);
+  new_cons->xb = TO_3BL(cdr);
+
+  return new_cons;
+}
+
+void *cons_int_int(int32_t car, int32_t cdr) {
+  if (IS_2BI_COMPAT(car)) {
+    if (IS_2BI_COMPAT(cdr))
+      return cons_ptr_ptr(TO_2BI(car), TO_2BI(cdr));
+
+    return cons_ptr_int(TO_2BI(car), cdr);
+  } 
+
+  if (IS_2BI_COMPAT(cdr))
+    return cons_int_ptr(car, TO_2BI(cdr));
+
+  Cons3x *new_cons = uber_allocate(sizeof(Cons3x));
+  new_cons->car = TO_3BH(car);
+  new_cons->car_xb = TO_3BL(car);
+  new_cons->cdr = TO_3BH(cdr);
+  new_cons->cdr_xb = TO_3BL(cdr);
+
+  return new_cons;
+ 
 }
 
 int main() {
