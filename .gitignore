@@ -2,3 +2,4 @@
 uberlisp
 *.elf
 *.hex
+*.dSYM
