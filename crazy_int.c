@@ -48,11 +48,25 @@ void *store_int(long value) {
 #define IS_INT4(int_p) (*(uint8_t*)(int_p) & INT4_T)
 #define IS_INT8(int_p) (*(uint8_t*)(int_p) & INT8_T)
 
-long read_int(void *int_p) {
-  void *val_p = (unsigned char*)int_p + 1;
-  if (IS_INT2(int_p)) return (long)(*(short*)val_p);
-  if (IS_INT4(int_p)) return (long)(*(int*)val_p);
+long read_int(void *int_p, uint8_t **cursor) {
+  void *val_p = (uint8_t*)int_p + 1;
+  if (IS_INT2(int_p)) {
+    *cursor += sizeof(uint8_t) + sizeof(short);
+    return (long)(*(short*)val_p);
+  }
+  if (IS_INT4(int_p)) {
+    *cursor += sizeof(uint8_t) + sizeof(int);
+    return (long)(*(int*)val_p);
+  }
+  *cursor += sizeof(uint8_t) + sizeof(long);
   return *(long*)val_p;
+}
+
+void print_ints(void *list) {
+  uint8_t *cursor = list;
+  while(*cursor) {
+    printf("%li\n", read_int(cursor, &cursor));
+  }
 }
 
 int main() {
@@ -78,18 +92,22 @@ int main() {
   void *lp3 = store_int(LONG_MAX);
   void *lp4 = store_int(LONG_MIN);
 
-  printf("%li should be 0\n", read_int(sp1));
-  printf("%li should be -1\n", read_int(sp2));
-  printf("%li should be %d\n", read_int(sp3), SHRT_MAX);
-  printf("%li should be %d\n", read_int(sp4), SHRT_MIN);
-  printf("%li should be %d\n", read_int(ip1), SHRT_MAX+1);
-  printf("%li should be %d\n", read_int(ip2), SHRT_MIN-1);
-  printf("%li should be %d\n", read_int(ip3), INT_MAX);
-  printf("%li should be %d\n", read_int(ip4), INT_MIN);
-  printf("%li should be %li\n", read_int(lp1), (long)INT_MAX+1);
-  printf("%li should be %li\n", read_int(lp2), (long)INT_MIN-1);
-  printf("%li should be %li\n", read_int(lp3), LONG_MAX);
-  printf("%li should be %li\n", read_int(lp4), LONG_MIN);
+  /*
+  uint8_t *cursor = sp1;
+  printf("%li should be 0\n", read_int(sp1, &cursor));
+  printf("%li should be -1\n", read_int(sp2, &cursor));
+  printf("%li should be %d\n", read_int(sp3, &cursor), SHRT_MAX);
+  printf("%li should be %d\n", read_int(sp4, &cursor), SHRT_MIN);
+  printf("%li should be %d\n", read_int(ip1, &cursor), SHRT_MAX+1);
+  printf("%li should be %d\n", read_int(ip2, &cursor), SHRT_MIN-1);
+  printf("%li should be %d\n", read_int(ip3, &cursor), INT_MAX);
+  printf("%li should be %d\n", read_int(ip4, &cursor), INT_MIN);
+  printf("%li should be %li\n", read_int(lp1, &cursor), (long)INT_MAX+1);
+  printf("%li should be %li\n", read_int(lp2, &cursor), (long)INT_MIN-1);
+  printf("%li should be %li\n", read_int(lp3, &cursor), LONG_MAX);
+  printf("%li should be %li\n", read_int(lp4, &cursor), LONG_MIN);
+  */
+  print_ints(sp1);
 
   return 0;
 }
