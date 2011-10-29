@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 
 void * const MPOOL;
 void * const MSTART_p;
@@ -10,12 +11,12 @@ void * HEAP_p;
 
 #define SET_CONSTVP(ptr, val) (*(void **)&ptr) = (val)
 
-#define INT2_T (unsigned char)0x20
-#define INT4_T (unsigned char)0x40
-#define INT8_T (unsigned char)0x80
+#define INT2_T (uint8_t)0x20
+#define INT4_T (uint8_t)0x40
+#define INT8_T (uint8_t)0x80
 
-#define SET_INT_T(ptr, type) (*(unsigned char*)ptr) = type
-#define MV_HEAP(bytes) (*(unsigned char**)&HEAP_p) += bytes
+#define SET_INT_T(ptr, type) (*(uint8_t*)ptr) = type
+#define MV_HEAP(bytes) (*(uint8_t**)&HEAP_p) += bytes
 
 typedef struct {
   short val_p;
@@ -43,9 +44,9 @@ void *store_int(long value) {
   return new_int_p;
 }
 
-#define IS_INT2(int_p) (*(unsigned char*)(int_p) & INT2_T)
-#define IS_INT4(int_p) (*(unsigned char*)(int_p) & INT4_T)
-#define IS_INT8(int_p) (*(unsigned char*)(int_p) & INT8_T)
+#define IS_INT2(int_p) (*(uint8_t*)(int_p) & INT2_T)
+#define IS_INT4(int_p) (*(uint8_t*)(int_p) & INT4_T)
+#define IS_INT8(int_p) (*(uint8_t*)(int_p) & INT8_T)
 
 long read_int(void *int_p) {
   void *val_p = (unsigned char*)int_p + 1;
