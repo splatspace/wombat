@@ -9,105 +9,76 @@ void * const MSTART_p;
 void * const MEND_p;
 void * HEAP_p;
 
+void * const COBJST_p;
+void * const COBJED_p;
+
 #define SET_CONSTVP(ptr, val) (*(void **)&ptr) = (val)
-
-#define INT2_T (uint8_t)0x20
-#define INT4_T (uint8_t)0x40
-#define INT8_T (uint8_t)0x80
-
-#define SET_INT_T(ptr, type) (*(uint8_t*)ptr) = type
 #define MV_HEAP(bytes) (*(uint8_t**)&HEAP_p) += bytes
 
+#define UBER_2BI_MAX (int16_t)0x1FFF
+#define UBER_2BI_MIN (-(UBER_2BI_MAX)-1)
+
+#define UBER_3BI_MAX (int32_t)0x1FFFFF
+#define UBER_3BI_MIN (-(UBER_3BI_MAX)-1)
+
+#define MASK2BI ((uint16_t)0x4000)
+#define MASK3BI ((uint16_t)0x8000)
+#define IS_INT(val) ((val) & 0xF000)
+#define IS_2BI(val) ((val) & MASK2BI)
+#define IS_3BI(val) ((val) & MASK3BI)
+
+#define TO_2BI(val) (((uint16_t)(val) & (uint16_t)0x3FFF) | MASK2BI)
+#define TO_3BH(val) (((uint16_t)(val))>>4)
+
 typedef struct {
-  short val_p;
-} Object;
+  uint16_t car;
+  uint16_t cdr;
+} Cons;
 
-void *store_int(long value) {
-  void *new_int_p = HEAP_p;
-  if (value <= SHRT_MAX && value >= SHRT_MIN) {
-    SET_INT_T(HEAP_p, INT2_T);
-    MV_HEAP(1);
-    *(short*)HEAP_p = (short)value;
-    MV_HEAP(sizeof(short));
-  } else if (value <= INT_MAX && value >= INT_MIN) {
-    SET_INT_T(HEAP_p, INT4_T);
-    MV_HEAP(1);
-    *(int*)HEAP_p = (int)value;
-    MV_HEAP(sizeof(int));
-  } else {
-    SET_INT_T(HEAP_p, INT8_T);
-    MV_HEAP(1);
-    *(long*)HEAP_p = value;
-    MV_HEAP(sizeof(long));
-  }
+typedef struct {
+  uint16_t car;
+  uint16_t cdr;
+  uint8_t xb;
+} Cons3;
 
-  return new_int_p;
+typedef struct {
+  uint16_t car;
+  uint16_t cdr;
+  uint8_t car_xb;
+  uint8_t cdr_xb;
+} Cons3x;
+
+void *uber_allocate(uint16_t size) {
 }
 
-#define IS_INT2(int_p) (*(uint8_t*)(int_p) & INT2_T)
-#define IS_INT4(int_p) (*(uint8_t*)(int_p) & INT4_T)
-#define IS_INT8(int_p) (*(uint8_t*)(int_p) & INT8_T)
-
-long read_int(void *int_p, uint8_t **cursor) {
-  void *val_p = (uint8_t*)int_p + 1;
-  if (IS_INT2(int_p)) {
-    *cursor += sizeof(uint8_t) + sizeof(short);
-    return (long)(*(short*)val_p);
-  }
-  if (IS_INT4(int_p)) {
-    *cursor += sizeof(uint8_t) + sizeof(int);
-    return (long)(*(int*)val_p);
-  }
-  *cursor += sizeof(uint8_t) + sizeof(long);
-  return *(long*)val_p;
+Cons *cons_ptr_ptr(uint16_t car, uint16_t cdr) {
+  Cons *new_cons = uber_allocate(sizeof(Cons));
+  new_cons->car = car;
+  new_cons->cdr = cdr;
+  return new_cons;
 }
 
-void print_ints(void *list) {
-  uint8_t *cursor = list;
-  while(*cursor) {
-    printf("%li\n", read_int(cursor, &cursor));
-  }
+void *cons_int_ptr(int32_t car, uint16_t cdr) {
+  if (car <= UBER_2BI_MAX && car >= UBER_2BI_MIN)
+    return cons_ptr_ptr(TO_2BI(car), cdr);
+
+  Cons3 *new_cons = uber_allocate(sizeof(Cons3));
+  new_cons
 }
 
 int main() {
   SET_CONSTVP(MPOOL, malloc(0x900));
+
+  /* The first 0x100 addresses are registers in ATmega328 */
   SET_CONSTVP(MSTART_p, MPOOL + 0x100);
-  SET_CONSTVP(MEND_p, MPOOL + 0x900);
-  HEAP_p = MSTART_p;
+  /* 0x800 (2048) bytes of SRAM addresses */
+  SET_CONSTVP(MEND_p, MSTART_p + 0x800);
 
-  memset(MSTART_p, 0, 0x800);
+  SET_CONSTVP(COBJST_p, MSTART_p);
+  SET_CONSTVP(COBJED_p, MSTART_p + 0x100);
+  HEAP_p = COBJED_p;
 
-  void *sp1 = store_int(0);
-  void *sp2 = store_int(-1);
-  void *sp3 = store_int(SHRT_MAX);
-  void *sp4 = store_int(SHRT_MIN);
-
-  void *ip1 = store_int(SHRT_MAX + 1);
-  void *ip2 = store_int(SHRT_MIN - 1);
-  void *ip3 = store_int(INT_MAX);
-  void *ip4 = store_int(INT_MIN);
-
-  void *lp1 = store_int((long)INT_MAX + 1);
-  void *lp2 = store_int((long)INT_MIN - 1);
-  void *lp3 = store_int(LONG_MAX);
-  void *lp4 = store_int(LONG_MIN);
-
-  /*
-  uint8_t *cursor = sp1;
-  printf("%li should be 0\n", read_int(sp1, &cursor));
-  printf("%li should be -1\n", read_int(sp2, &cursor));
-  printf("%li should be %d\n", read_int(sp3, &cursor), SHRT_MAX);
-  printf("%li should be %d\n", read_int(sp4, &cursor), SHRT_MIN);
-  printf("%li should be %d\n", read_int(ip1, &cursor), SHRT_MAX+1);
-  printf("%li should be %d\n", read_int(ip2, &cursor), SHRT_MIN-1);
-  printf("%li should be %d\n", read_int(ip3, &cursor), INT_MAX);
-  printf("%li should be %d\n", read_int(ip4, &cursor), INT_MIN);
-  printf("%li should be %li\n", read_int(lp1, &cursor), (long)INT_MAX+1);
-  printf("%li should be %li\n", read_int(lp2, &cursor), (long)INT_MIN-1);
-  printf("%li should be %li\n", read_int(lp3, &cursor), LONG_MAX);
-  printf("%li should be %li\n", read_int(lp4, &cursor), LONG_MIN);
-  */
-  print_ints(sp1);
+  memset(MPOOL, 0, 0x900);
 
   return 0;
 }
