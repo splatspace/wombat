@@ -35,19 +35,20 @@ uint8_t * STR_SP_p;
 
 #define IS_2BI_COMPAT(val) ((val) <= UBER_2BI_MAX && (val) >= UBER_2BI_MIN)
 
-#define UPTR(ptr) ((uint16_t)((uint8_t *)(ptr) - MPOOL))
-#define CPTR(ptr) ((void *)((uint8_t *)(ptr) + MPOOL))
+#define UPTR(ptr) ((uint16_t)((uintptr_t)(ptr) - (uintptr_t)MPOOL))
+#define CPTR(uptr) ((void *)((uintptr_t)(uptr) + (uintptr_t)MPOOL))
 
 #define IS_IN_SPACE(uptr, sp) ((uptr) > UTPR(sp) && (uptr) < UPTR(sp + *(sp-1)))
 #define IS_STR(uptr) (IS_IN_SPACE(uptr, STR_SP_p))
-#define IS_CONS(uptr) (IS_IN_SPACE(uptr, CONS_SP_p) || IS_IN_SPACE(CONS3_SP_p) || IS_IN_SPACE(CONS3x_SP_p))
+#define IS_CONS(uptr) (IS_IN_SPACE(uptr, CONS_SP_p) || IS_IN_SPACE(uptr, CONS3_SP_p) || IS_IN_SPACE(uptr, CONS3x_SP_p))
 
 #define CAR(uptr) (UPTR(((Cons *)CPTR(uptr))->car))
 #define CDR(uptr) (UPTR(((Cons *)CPTR(uptr))->cdr))
+#define XB(uptr) (((Cons3 *)CPTR(uptr))->xb)
+#define XB_CDR(uptr) (((Cons3x *)CPTR(uptr))->xb_cdr)
 
 #define IVAL_2BI(val) ((int16_t)((uint16_t)(val)<<2)>>2)
 #define IVAL_3BI(val_h, val_l) ((((int32_t)IVAL_2BI(val_h))<<8) | (uint32_t)(val_l))
-#define IVAL(val) (IS_2BI(val) ? IVAL_2BI(val) : IVAL_3BI(val))
 
 typedef struct {
   uint16_t car;
@@ -63,7 +64,7 @@ typedef struct {
 typedef struct {
   uint16_t car;
   uint16_t cdr;
-  uint8_t car_xb;
+  uint8_t xb;
   uint8_t cdr_xb;
 } Cons3x;
 
@@ -102,8 +103,8 @@ uint16_t str_alloc() {
 
 uint16_t cons_ptr_ptr(uint16_t car, uint16_t cdr) {
   uint16_t new_cons = cons_alloc();
-  new_cons->car = car;
-  new_cons->cdr = cdr;
+  ((Cons *)CPTR(new_cons))->car = car;
+  ((Cons *)CPTR(new_cons))->cdr = cdr;
   return new_cons;
 }
 
@@ -112,9 +113,9 @@ uint16_t cons_int_ptr(int32_t car, uint16_t cdr) {
     return cons_ptr_ptr(TO_2BI(car), cdr);
 
   uint16_t new_cons = cons3_alloc();
-  new_cons->car = TO_3BH(car);
-  new_cons->xb = TO_3BL(car);
-  new_cons->cdr = cdr;
+  ((Cons3 *)CPTR(new_cons))->car = TO_3BH(car);
+  ((Cons3 *)CPTR(new_cons))->xb = TO_3BL(car);
+  ((Cons3 *)CPTR(new_cons))->cdr = cdr;
 
   return new_cons;
 }
@@ -124,9 +125,9 @@ uint16_t cons_ptr_int(uint16_t car, int32_t cdr) {
     return cons_ptr_ptr(car, TO_2BI(cdr));
 
   uint16_t new_cons = cons3_alloc();
-  new_cons->car = car;
-  new_cons->cdr = TO_3BH(cdr);
-  new_cons->xb = TO_3BL(cdr);
+  ((Cons3 *)CPTR(new_cons))->car = car;
+  ((Cons3 *)CPTR(new_cons))->cdr = TO_3BH(cdr);
+  ((Cons3 *)CPTR(new_cons))->xb = TO_3BL(cdr);
 
   return new_cons;
 }
@@ -143,23 +144,34 @@ uint16_t cons_int_int(int32_t car, int32_t cdr) {
     return cons_int_ptr(car, TO_2BI(cdr));
 
   uint16_t new_cons = cons3x_alloc();
-  new_cons->car = TO_3BH(car);
-  new_cons->car_xb = TO_3BL(car);
-  new_cons->cdr = TO_3BH(cdr);
-  new_cons->cdr_xb = TO_3BL(cdr);
+  ((Cons3x *)CPTR(new_cons))->car = TO_3BH(car);
+  ((Cons3x *)CPTR(new_cons))->car_xb = TO_3BL(car);
+  ((Cons3x *)CPTR(new_cons))->cdr = TO_3BH(cdr);
+  ((Cons3x *)CPTR(new_cons))->cdr_xb = TO_3BL(cdr);
 
   return new_cons;
  
 }
 
 void print_list(uint16_t list_p) {
-  print_form(CAR(list_p));
+  if (IS_2BI(CAR(list_p)))
+    printf("%d", IVAL_2BI(CAR(list_p)));
+  else if (IS_3BI(CAR(list_p)))
+    printf("%d", IVAL_3BI(CAR(list_p), XB(list_p)));
+  else
+    print_form(CAR(list_p));
+
   printf(" ");
   if (IS_CONS(CDR(list_p)))
     print_list(CDR(list_p));
   else {
     printf(". ");
-    print_form(CDR(list_p));
+    if (IS_2BI(CDR(list_p)))
+      printf("%d", IVAL_2BI(CDR(list_p)));
+    else if (IS_3BI(CDR(list_p)))
+      printf("%d", IVAL_3BI(CDR(list_p), XB_CDR(list_p)));
+    else
+      print_form(CDR(list_p));
   }
 }
 
@@ -171,7 +183,7 @@ void print_form(uint16_t form) {
   } else if (IS_STR(form)) {
     printf("%s", (char *)CPTR(form));
   } else if (IS_INT(form)) {
-    printf("%li", IVAL(form));
+    printf("%s%d", (IS_3BI(form) ? "<trunc>" : ""), IVAL_2BI(form));
   } else {
     printf("WUT?");
   }
