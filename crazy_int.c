@@ -172,7 +172,7 @@ void print_list(uint16_t list_p) {
     if (IS_2BI(CDR(list_p)))
       printf("%d", IVAL_2BI(CDR(list_p)));
     else if (IS_3BI(CDR(list_p)))
-      printf("%d", IVAL_3BI(CDR(list_p), XB_CDR(list_p)));
+      printf("%d", IVAL_3BI(CDR(list_p), (IS_3BI(CAR(list_p)) ? XB_CDR(list_p) : XB(list_p))));
     else
       print_form(CDR(list_p));
   }
@@ -202,28 +202,32 @@ int main() {
   SET_MEMP(MEND_p, MSTART_p + 0x800);
 
   HEAP_p = MSTART_p;
-  CONS_SP_p = uber_allocate(10*sizeof(Cons)+1);
-  CONS3_SP_p = uber_allocate(10*sizeof(Cons3)+1);
-  CONS3x_SP_p = uber_allocate(10*sizeof(Cons3x)+1);
+  CONS_SP_p = uber_allocate(20*sizeof(Cons)+1);
+  CONS3_SP_p = uber_allocate(20*sizeof(Cons3)+1);
+  CONS3x_SP_p = uber_allocate(20*sizeof(Cons3x)+1);
   STR_SP_p = uber_allocate(10*STR_SIZE+1);
 
-  Cons *list = (Cons *)CPTR(cons_int_ptr(42, NIL));
+  uint16_t list = 
+    cons_int_ptr(UBER_3BI_MIN,
+        cons_int_ptr(UBER_3BI_MAX,
+          cons_int_ptr(UBER_2BI_MIN-1,
+            cons_int_ptr(UBER_2BI_MAX+1,
+              cons_int_ptr(UBER_2BI_MIN,
+                cons_int_ptr(UBER_2BI_MAX,
+                  cons_int_ptr(-42,
+                    cons_int_ptr(42, NIL))))))));
 
-  printf("Cons *list: %p\nUPTR(list): 0x%x\n", list, UPTR(list));
-  printf("IS_CONS? %s\n", (IS_CONS(UPTR(list)) ? "yes" : "no"));
-  printf("IS_IN_SPACE(UPTR(list), CONS_SP_p)? %s\n", (IS_IN_SPACE(UPTR(list), CONS_SP_p, sizeof(Cons)) ? "yes" : "no"));
-  printf("UPTR(CONS_SP_p) 0x%x\n", UPTR(CONS_SP_p));
-  printf("UPTR(MSTART_p) 0x%x\n", UPTR(MSTART_p));
-  printf("UPTR(HEAP_p) 0x%x\n", UPTR(HEAP_p));
-  printf("*MSTART_p %d\n", (int32_t)*MSTART_p);
-  printf("*(MSTART_p+1) %d\n", (int32_t)*(MSTART_p+1));
-  printf("sizeof(Cons) %lu\n", sizeof(Cons));
-  printf("sizeof(Cons3) %lu\n", sizeof(Cons3));
-  printf("sizeof(Cons3x) %lu\n", sizeof(Cons3x));
-  printf("sizeof(uint8_t) %lu\n", sizeof(uint8_t));
-
+  print_form(list);
   printf("\n");
-  print_form(UPTR(list));
+
+  uint16_t lol = cons_ptr_int(list, 500);
+  print_form(lol);
+  printf("\n");
+  print_form(cons_ptr_ptr(list, list));
+  printf("\n");
+  print_form(cons_int_int(0, UBER_3BI_MAX));
+  printf("\n");
+  print_form(cons_int_int(0, 65535));
   printf("\n");
 
   return 0;
