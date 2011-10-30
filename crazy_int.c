@@ -14,7 +14,6 @@ uint8_t * CONS3x_SP_p;
 uint8_t * STR_SP_p;
 
 #define SET_MEMP(ptr, val) (*(uint8_t **)&ptr) = (val)
-#define MV_HEAP(bytes) (*(uint8_t**)&HEAP_p) += bytes
 
 #define UBER_2BI_MAX (int16_t)0x1FFF
 #define UBER_2BI_MIN (-(UBER_2BI_MAX)-1)
@@ -38,17 +37,21 @@ uint8_t * STR_SP_p;
 #define UPTR(ptr) ((uint16_t)((uintptr_t)(ptr) - (uintptr_t)MPOOL))
 #define CPTR(uptr) ((void *)((uintptr_t)(uptr) + (uintptr_t)MPOOL))
 
-#define IS_IN_SPACE(uptr, sp) ((uptr) > UTPR(sp) && (uptr) < UPTR(sp + *(sp-1)))
-#define IS_STR(uptr) (IS_IN_SPACE(uptr, STR_SP_p))
-#define IS_CONS(uptr) (IS_IN_SPACE(uptr, CONS_SP_p) || IS_IN_SPACE(uptr, CONS3_SP_p) || IS_IN_SPACE(uptr, CONS3x_SP_p))
+#define STR_SIZE 17
 
-#define CAR(uptr) (UPTR(((Cons *)CPTR(uptr))->car))
-#define CDR(uptr) (UPTR(((Cons *)CPTR(uptr))->cdr))
+#define IS_IN_SPACE(uptr, sp, size) ((uptr) > UPTR(sp) && (uptr) < UPTR(sp + (*sp)*size+1))
+#define IS_STR(uptr) (IS_IN_SPACE(uptr, STR_SP_p, STR_SIZE))
+#define IS_CONS(uptr) (IS_IN_SPACE(uptr, CONS_SP_p, sizeof(Cons)) || IS_IN_SPACE(uptr, CONS3_SP_p, sizeof(Cons3)) || IS_IN_SPACE(uptr, CONS3x_SP_p, sizeof(Cons3x)))
+
+#define CAR(uptr) (((Cons *)CPTR(uptr))->car)
+#define CDR(uptr) (((Cons *)CPTR(uptr))->cdr)
 #define XB(uptr) (((Cons3 *)CPTR(uptr))->xb)
 #define XB_CDR(uptr) (((Cons3x *)CPTR(uptr))->xb_cdr)
 
 #define IVAL_2BI(val) ((int16_t)((uint16_t)(val)<<2)>>2)
 #define IVAL_3BI(val_h, val_l) ((((int32_t)IVAL_2BI(val_h))<<8) | (uint32_t)(val_l))
+
+#define NIL 0
 
 typedef struct {
   uint16_t car;
@@ -65,39 +68,37 @@ typedef struct {
   uint16_t car;
   uint16_t cdr;
   uint8_t xb;
-  uint8_t cdr_xb;
+  uint8_t xb_cdr;
 } Cons3x;
 
-#define STR_SIZE 17
-
-void *uber_allocate(uint8_t size) {
+uint8_t *uber_allocate(uint8_t size) {
   *HEAP_p = size;
-  void *alloc = HEAP_p + 1;
-  MV_HEAP(size+1);
+  uint8_t *alloc = HEAP_p + 1;
+  HEAP_p += size+1;
   return alloc;
 }
 
 uint16_t cons_alloc() {
   uint8_t *cons_p = CONS_SP_p + (*CONS_SP_p)*sizeof(Cons) + 1;
-  *CONS_SP_p++;
+  (*CONS_SP_p)++;
   return UPTR(cons_p);
 }
 
 uint16_t cons3_alloc() {
   uint8_t *cons3_p = CONS3_SP_p + (*CONS3_SP_p)*sizeof(Cons3) + 1;
-  *CONS3_SP_p++;
+  (*CONS3_SP_p)++;
   return UPTR(cons3_p);
 }
 
 uint16_t cons3x_alloc() {
   uint8_t *cons3x_p = CONS3x_SP_p + (*CONS3x_SP_p)*sizeof(Cons3x) + 1;
-  *CONS3x_SP_p++;
+  (*CONS3x_SP_p)++;
   return UPTR(cons3x_p);
 }
 
 uint16_t str_alloc() {
   uint8_t *str_p = STR_SP_p + (*STR_SP_p)*STR_SIZE + 1;
-  *STR_SP_p++;
+  (*STR_SP_p)++;
   return UPTR(str_p);
 }
 
@@ -145,13 +146,15 @@ uint16_t cons_int_int(int32_t car, int32_t cdr) {
 
   uint16_t new_cons = cons3x_alloc();
   ((Cons3x *)CPTR(new_cons))->car = TO_3BH(car);
-  ((Cons3x *)CPTR(new_cons))->car_xb = TO_3BL(car);
+  ((Cons3x *)CPTR(new_cons))->xb = TO_3BL(car);
   ((Cons3x *)CPTR(new_cons))->cdr = TO_3BH(cdr);
-  ((Cons3x *)CPTR(new_cons))->cdr_xb = TO_3BL(cdr);
+  ((Cons3x *)CPTR(new_cons))->xb_cdr = TO_3BL(cdr);
 
   return new_cons;
  
 }
+
+void print_form(uint16_t);
 
 void print_list(uint16_t list_p) {
   if (IS_2BI(CAR(list_p)))
@@ -161,11 +164,11 @@ void print_list(uint16_t list_p) {
   else
     print_form(CAR(list_p));
 
-  printf(" ");
-  if (IS_CONS(CDR(list_p)))
+  if (IS_CONS(CDR(list_p))) {
+    printf(" ");
     print_list(CDR(list_p));
-  else {
-    printf(". ");
+  } else if (CDR(list_p) != NIL) {
+    printf(" . ");
     if (IS_2BI(CDR(list_p)))
       printf("%d", IVAL_2BI(CDR(list_p)));
     else if (IS_3BI(CDR(list_p)))
@@ -190,12 +193,13 @@ void print_form(uint16_t form) {
 }
 
 int main() {
-  SET_CONSTVP(MPOOL, malloc(0x900));
+  SET_MEMP(MPOOL, malloc(0x900));
+  memset(MPOOL, 0, 0x900);
 
   /* The first 0x100 addresses are registers in ATmega328 */
-  SET_CONSTVP(MSTART_p, MPOOL + 0x100);
+  SET_MEMP(MSTART_p, MPOOL + 0x100);
   /* 0x800 (2048) bytes of SRAM addresses */
-  SET_CONSTVP(MEND_p, MSTART_p + 0x800);
+  SET_MEMP(MEND_p, MSTART_p + 0x800);
 
   HEAP_p = MSTART_p;
   CONS_SP_p = uber_allocate(10*sizeof(Cons)+1);
@@ -203,11 +207,24 @@ int main() {
   CONS3x_SP_p = uber_allocate(10*sizeof(Cons3x)+1);
   STR_SP_p = uber_allocate(10*STR_SIZE+1);
 
-  memset(MPOOL, 0, 0x900);
+  Cons *list = (Cons *)CPTR(cons_int_ptr(42, NIL));
 
-  Cons *list = (Cons *)CPTR(cons_int_ptr(42, NULL));
+  printf("Cons *list: %p\nUPTR(list): 0x%x\n", list, UPTR(list));
+  printf("IS_CONS? %s\n", (IS_CONS(UPTR(list)) ? "yes" : "no"));
+  printf("IS_IN_SPACE(UPTR(list), CONS_SP_p)? %s\n", (IS_IN_SPACE(UPTR(list), CONS_SP_p, sizeof(Cons)) ? "yes" : "no"));
+  printf("UPTR(CONS_SP_p) 0x%x\n", UPTR(CONS_SP_p));
+  printf("UPTR(MSTART_p) 0x%x\n", UPTR(MSTART_p));
+  printf("UPTR(HEAP_p) 0x%x\n", UPTR(HEAP_p));
+  printf("*MSTART_p %d\n", (int32_t)*MSTART_p);
+  printf("*(MSTART_p+1) %d\n", (int32_t)*(MSTART_p+1));
+  printf("sizeof(Cons) %lu\n", sizeof(Cons));
+  printf("sizeof(Cons3) %lu\n", sizeof(Cons3));
+  printf("sizeof(Cons3x) %lu\n", sizeof(Cons3x));
+  printf("sizeof(uint8_t) %lu\n", sizeof(uint8_t));
 
+  printf("\n");
   print_form(UPTR(list));
+  printf("\n");
 
   return 0;
 }
