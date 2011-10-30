@@ -8,9 +8,9 @@ uint8_t * const MPOOL;
 uint8_t * const MSTART_p;
 uint8_t * const MEND_p;
 uint8_t * HEAP_p;
-uint8_t * CONS_SP_p
-uint8_t * CONS3_SP_p
-uint8_t * CONS3x_SP_p
+uint8_t * CONS_SP_p;
+uint8_t * CONS3_SP_p;
+uint8_t * CONS3x_SP_p;
 uint8_t * STR_SP_p;
 
 #define SET_MEMP(ptr, val) (*(uint8_t **)&ptr) = (val)
@@ -38,6 +38,17 @@ uint8_t * STR_SP_p;
 #define UPTR(ptr) ((uint16_t)((uint8_t *)(ptr) - MPOOL))
 #define CPTR(ptr) ((void *)((uint8_t *)(ptr) + MPOOL))
 
+#define IS_IN_SPACE(uptr, sp) ((uptr) > UTPR(sp) && (uptr) < UPTR(sp + *(sp-1)))
+#define IS_STR(uptr) (IS_IN_SPACE(uptr, STR_SP_p))
+#define IS_CONS(uptr) (IS_IN_SPACE(uptr, CONS_SP_p) || IS_IN_SPACE(CONS3_SP_p) || IS_IN_SPACE(CONS3x_SP_p))
+
+#define CAR(uptr) (UPTR(((Cons *)CPTR(uptr))->car))
+#define CDR(uptr) (UPTR(((Cons *)CPTR(uptr))->cdr))
+
+#define IVAL_2BI(val) ((int16_t)((uint16_t)(val)<<2)>>2)
+#define IVAL_3BI(val_h, val_l) ((((int32_t)IVAL_2BI(val_h))<<8) | (uint32_t)(val_l))
+#define IVAL(val) (IS_2BI(val) ? IVAL_2BI(val) : IVAL_3BI(val))
+
 typedef struct {
   uint16_t car;
   uint16_t cdr;
@@ -56,7 +67,7 @@ typedef struct {
   uint8_t cdr_xb;
 } Cons3x;
 
-typedef char[17] String;
+#define STR_SIZE 17
 
 void *uber_allocate(uint8_t size) {
   *HEAP_p = size;
@@ -72,7 +83,7 @@ uint16_t cons_alloc() {
 }
 
 uint16_t cons3_alloc() {
-  uint8_t *cons3_p = CONS_SP_p + (*CONS3_SP_p)*sizeof(Cons3) + 1;
+  uint8_t *cons3_p = CONS3_SP_p + (*CONS3_SP_p)*sizeof(Cons3) + 1;
   *CONS3_SP_p++;
   return UPTR(cons3_p);
 }
@@ -84,7 +95,7 @@ uint16_t cons3x_alloc() {
 }
 
 uint16_t str_alloc() {
-  uint8_t *str_p = STR_SP_p + (*STR_SP_p)*sizeof(String) + 1;
+  uint8_t *str_p = STR_SP_p + (*STR_SP_p)*STR_SIZE + 1;
   *STR_SP_p++;
   return UPTR(str_p);
 }
@@ -141,6 +152,31 @@ uint16_t cons_int_int(int32_t car, int32_t cdr) {
  
 }
 
+void print_list(uint16_t list_p) {
+  print_form(CAR(list_p));
+  printf(" ");
+  if (IS_CONS(CDR(list_p)))
+    print_list(CDR(list_p));
+  else {
+    printf(". ");
+    print_form(CDR(list_p));
+  }
+}
+
+void print_form(uint16_t form) {
+  if (IS_CONS(form)) {
+    printf("(");
+    print_list(form);
+    printf(")");
+  } else if (IS_STR(form)) {
+    printf("%s", (char *)CPTR(form));
+  } else if (IS_INT(form)) {
+    printf("%li", IVAL(form));
+  } else {
+    printf("WUT?");
+  }
+}
+
 int main() {
   SET_CONSTVP(MPOOL, malloc(0x900));
 
@@ -153,9 +189,13 @@ int main() {
   CONS_SP_p = uber_allocate(10*sizeof(Cons)+1);
   CONS3_SP_p = uber_allocate(10*sizeof(Cons3)+1);
   CONS3x_SP_p = uber_allocate(10*sizeof(Cons3x)+1);
-  STR_SP_p = uber_allocate(10*sizeof(String)+1);
+  STR_SP_p = uber_allocate(10*STR_SIZE+1);
 
   memset(MPOOL, 0, 0x900);
+
+  Cons *list = (Cons *)CPTR(cons_int_ptr(42, NULL));
+
+  print_form(UPTR(list));
 
   return 0;
 }
