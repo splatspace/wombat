@@ -4,15 +4,16 @@
 #include <limits.h>
 #include <stdint.h>
 
-void * const MPOOL;
-void * const MSTART_p;
-void * const MEND_p;
-void * HEAP_p;
+uint8_t * const MPOOL;
+uint8_t * const MSTART_p;
+uint8_t * const MEND_p;
+uint8_t * HEAP_p;
+uint8_t * CONS_SP_p
+uint8_t * CONS3_SP_p
+uint8_t * CONS3x_SP_p
+uint8_t * STR_SP_p;
 
-void * const COBJST_p;
-void * const COBJED_p;
-
-#define SET_CONSTVP(ptr, val) (*(void **)&ptr) = (val)
+#define SET_MEMP(ptr, val) (*(uint8_t **)&ptr) = (val)
 #define MV_HEAP(bytes) (*(uint8_t**)&HEAP_p) += bytes
 
 #define UBER_2BI_MAX (int16_t)0x1FFF
@@ -27,12 +28,15 @@ void * const COBJED_p;
 #define IS_2BI(val) ((val) & MASK2BI)
 #define IS_3BI(val) ((val) & MASK3BI)
 
-#define TO_6BIT(val) ((uint16_t)(val) & (uint16_t)0x3FFF)
-#define TO_2BI(val) (TO_6BIT(val) | MASK2BI)
-#define TO_3BH(val) (TO_6BIT(((val)>>4)) | MASK3BI)
+#define TO_14BIT(val) ((uint16_t)(val) & (uint16_t)0x3FFF)
+#define TO_2BI(val) (TO_14BIT(val) | MASK2BI)
+#define TO_3BH(val) (TO_14BIT((val)>>8) | MASK3BI)
 #define TO_3BL(val) ((uint8_t)(val))
 
 #define IS_2BI_COMPAT(val) ((val) <= UBER_2BI_MAX && (val) >= UBER_2BI_MIN)
+
+#define UPTR(ptr) ((uint16_t)((uint8_t *)(ptr) - MPOOL))
+#define CPTR(ptr) ((void *)((uint8_t *)(ptr) + MPOOL))
 
 typedef struct {
   uint16_t car;
@@ -52,21 +56,51 @@ typedef struct {
   uint8_t cdr_xb;
 } Cons3x;
 
-void *uber_allocate(uint16_t size) {
+typedef char[17] String;
+
+void *uber_allocate(uint8_t size) {
+  *HEAP_p = size;
+  void *alloc = HEAP_p + 1;
+  MV_HEAP(size+1);
+  return alloc;
 }
 
-Cons *cons_ptr_ptr(uint16_t car, uint16_t cdr) {
-  Cons *new_cons = uber_allocate(sizeof(Cons));
+uint16_t cons_alloc() {
+  uint8_t *cons_p = CONS_SP_p + (*CONS_SP_p)*sizeof(Cons) + 1;
+  *CONS_SP_p++;
+  return UPTR(cons_p);
+}
+
+uint16_t cons3_alloc() {
+  uint8_t *cons3_p = CONS_SP_p + (*CONS3_SP_p)*sizeof(Cons3) + 1;
+  *CONS3_SP_p++;
+  return UPTR(cons3_p);
+}
+
+uint16_t cons3x_alloc() {
+  uint8_t *cons3x_p = CONS3x_SP_p + (*CONS3x_SP_p)*sizeof(Cons3x) + 1;
+  *CONS3x_SP_p++;
+  return UPTR(cons3x_p);
+}
+
+uint16_t str_alloc() {
+  uint8_t *str_p = STR_SP_p + (*STR_SP_p)*sizeof(String) + 1;
+  *STR_SP_p++;
+  return UPTR(str_p);
+}
+
+uint16_t cons_ptr_ptr(uint16_t car, uint16_t cdr) {
+  uint16_t new_cons = cons_alloc();
   new_cons->car = car;
   new_cons->cdr = cdr;
   return new_cons;
 }
 
-void *cons_int_ptr(int32_t car, uint16_t cdr) {
+uint16_t cons_int_ptr(int32_t car, uint16_t cdr) {
   if (IS_2BI_COMPAT(car))
     return cons_ptr_ptr(TO_2BI(car), cdr);
 
-  Cons3 *new_cons = uber_allocate(sizeof(Cons3));
+  uint16_t new_cons = cons3_alloc();
   new_cons->car = TO_3BH(car);
   new_cons->xb = TO_3BL(car);
   new_cons->cdr = cdr;
@@ -74,11 +108,11 @@ void *cons_int_ptr(int32_t car, uint16_t cdr) {
   return new_cons;
 }
 
-void *cons_ptr_int(uint16_t car, int32_t cdr) {
+uint16_t cons_ptr_int(uint16_t car, int32_t cdr) {
   if (IS_2BI_COMPAT(cdr))
     return cons_ptr_ptr(car, TO_2BI(cdr));
 
-  Cons3 *new_cons = uber_allocate(sizeof(Cons3));
+  uint16_t new_cons = cons3_alloc();
   new_cons->car = car;
   new_cons->cdr = TO_3BH(cdr);
   new_cons->xb = TO_3BL(cdr);
@@ -86,7 +120,7 @@ void *cons_ptr_int(uint16_t car, int32_t cdr) {
   return new_cons;
 }
 
-void *cons_int_int(int32_t car, int32_t cdr) {
+uint16_t cons_int_int(int32_t car, int32_t cdr) {
   if (IS_2BI_COMPAT(car)) {
     if (IS_2BI_COMPAT(cdr))
       return cons_ptr_ptr(TO_2BI(car), TO_2BI(cdr));
@@ -97,7 +131,7 @@ void *cons_int_int(int32_t car, int32_t cdr) {
   if (IS_2BI_COMPAT(cdr))
     return cons_int_ptr(car, TO_2BI(cdr));
 
-  Cons3x *new_cons = uber_allocate(sizeof(Cons3x));
+  uint16_t new_cons = cons3x_alloc();
   new_cons->car = TO_3BH(car);
   new_cons->car_xb = TO_3BL(car);
   new_cons->cdr = TO_3BH(cdr);
@@ -115,9 +149,11 @@ int main() {
   /* 0x800 (2048) bytes of SRAM addresses */
   SET_CONSTVP(MEND_p, MSTART_p + 0x800);
 
-  SET_CONSTVP(COBJST_p, MSTART_p);
-  SET_CONSTVP(COBJED_p, MSTART_p + 0x100);
-  HEAP_p = COBJED_p;
+  HEAP_p = MSTART_p;
+  CONS_SP_p = uber_allocate(10*sizeof(Cons)+1);
+  CONS3_SP_p = uber_allocate(10*sizeof(Cons3)+1);
+  CONS3x_SP_p = uber_allocate(10*sizeof(Cons3x)+1);
+  STR_SP_p = uber_allocate(10*sizeof(String)+1);
 
   memset(MPOOL, 0, 0x900);
 
