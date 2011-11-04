@@ -27,28 +27,7 @@ uptr_t build_cons(uptr_t car, uptr_t cdr) {
 }
 
 uptr_t symbol_alloc(char *name) {
-  int len = strlen(name);
-  if (len > 6) len = 6;
-
-  if (len <= 4) {
-    memcpy(CPTR(SEND_p), name, len);
-    *SYM_PTR(SEND_p) |= LIT_SYM_FLAG;
-  } else {
-    int i;
-    for (i = 0; i < len; ++i) {
-      uint32_t *new_sym = SYM_PTR(SEND_p);
-      char cur = name[i];
-
-      if (isalpha(cur))
-        *new_sym |= (uint32_t)((char)toupper(cur) - 'A' + 1);
-      else
-        *new_sym |= 27;
-
-      *new_sym <<= 5;
-    }
-
-    if (len == 5) *new_sym <<= 5;
-  }
+  hash_sym(SEND_p, name);
 
   SEND_p += 4;
   return SEND_p - 4;

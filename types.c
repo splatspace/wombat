@@ -2,131 +2,47 @@
 #include <string.h>
 #include "types.h"
 
-/* Utilities *******************************/
+void hash_sym(uptr_t store, char *name) {
+  int len = strlen(name);
+  if (len > 6) len = 6;
 
-/* djb2 hash, http://www.cse.yorku.ca/~oz/hash.html */
-unsigned long djb2_hash(char *str)
-{
-  unsigned long hash = 5381;
-  int c;
+  uint32_t &hash = SYM_PTR(store);
 
-  while ((c = *str++))
-    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-  return hash;
-}
-
-/* Type Initializers *******************/
-
-Cons* cons(void* car, void* cdr) {
-  Cons* c = (Cons*)malloc(sizeof(Cons));
-  c->type = CONS;
-  c->car = car;
-  c->cdr = cdr;
-  return c;
-}
-
-void* append(void* tail, void* form) {
-  void* new_tail = NIL;
-  CAR(new_tail) = form;
-  CDR(tail) = new_tail;
-  return new_tail;
-}
-
-Atom* _make_atom() {
-  return (Atom*)malloc(sizeof(Atom));
-}
-
-Atom* integer(int ival) {
-  Atom* a = _make_atom();
-  a->type = INT;
-  a->v.ival = ival;
-  return a;
-}
-
-Atom* sym(char *s) {
-  Atom* a = _make_atom();
-  a->type = SYMBOL;
-  int len = strlen(s);
-  a->v.sval = (char*)malloc(sizeof(char)*(len+1));
-  strncpy(a->v.sval, s, len+1);
-  a->hashcode = djb2_hash(s);
-  return a;
-}
-
-/* Boolean Initializers *********/
-
-Atom _TRUE = { SYMBOL, 2090770405, {"true"}};
-Atom _FALSE = { SYMBOL, 258723568, {"false"}};
-Cons _NIL = { CONS, NULL, NULL };
-void *TRUE = (void*)&_TRUE;
-void *FALSE = (void*)&_FALSE;
-void *NIL = (void*)&_NIL;
-
-enum types type(void* expr) {
-  return ((Type*)expr)->type;
-}
-
-int truthy(void* x) {
-  return (x != NIL) && (x != FALSE);
-}
-
-/* Equality ****************/
-
-void* equal(void* x, void* y) {
-  if (x == y) {
-    return TRUE;
+  if (len <= 4) {
+    memcpy(&hash, name, len);
+    hash |= LIT_SYM_FLAG;
   } else {
-    switch(type(x)) {
-    case INT:
-      return (type(y) != INT)
-        ? FALSE
-        : (IVAL(x) == IVAL(y))
-          ? TRUE
-          : FALSE;
-    case SYMBOL:
-      return (type(y) != SYMBOL)
-        ? FALSE
-        : (HASHCODE(x) == HASHCODE(y))
-          ? TRUE
-          : FALSE;
-    case CONS:
-      return (type(y) != CONS)
-        ? FALSE
-        : equal(CAR(x), CAR(y))
-          ? equal(CDR(x), CDR(y))
-            ? TRUE
-            : FALSE
-          : FALSE;
-    default:
-      return FALSE;
+    int i;
+    for (i = 0; i < len; ++i) {
+      char cur = name[i];
+
+      if (isalpha(cur))
+        hash |= (uint32_t)((char)toupper(cur) - 'A' + 1);
+      else
+        hash |= USCORE_HSH;
+
+      hash <<= 5;
     }
   }
 }
 
-void rfree(void* x) {
-  if ((x != NIL) &&
-      (x != TRUE) &&
-      (x != FALSE) &&
-      (x != NULL)) {
-    switch(type(x)) {
-    case SPECIAL:
-      /* can't be freed */
-      return;
-    case FUNCTION:
-      /* TODO */
-      return;
-    case INT:
-      /* no members to free */
-      break;
-    case SYMBOL:
-      free(SVAL(x));
-      break;
-    case CONS:
-      rfree(CAR(x));
-      rfree(CDR(x));
-      break;
+void unhash_sym(char *buf, uptr_t sym_p) {
+  uint32_t hash = *SYM_PTR(sym_p);
+
+  if (hash & LIT_SYM_FLAG) {
+    hash &= ~LIT_SYM_FLAG;
+    strncpy(buf, (char *)&hash, 4);
+  } else {
+    char *cur = buf;
+    while(hash) {
+      *cur = (char)(hash & ((uint32_t)0x1F));
+      if (*cur == USCORE_HSH)
+        *cur = '_';
+      else
+        *cur = unhashed_c - 1 + 'A';
+
+      hash >>= 5;
+      ++cur;
     }
-    free(x);
   }
 }

@@ -18,4 +18,9 @@ typedef struct {
   uptr_t cdr;
 } Cons;
 
+#define USCORE_HSH 27
+
+void hash_sym(uptr_t store, char *name);
+void unhash_sym(char *buf, uptr_t sym_p);
+
 #endif
