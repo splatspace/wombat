@@ -1,83 +1,19 @@
 #ifndef _UBERLISP_TYPES_H
 #define _UBERLISP_TYPES_H
 
-/* Lisp Types *******************************/
+#define INT_FLAG (1<<14)
+#define CADR_FLAG (1<<15)
 
-enum types { SPECIAL, FUNCTION, SYMBOL, CONS, INT };
+#define IS_INT(uptr) ((uptr) & INT_FLAG)
+#define IS_PTR(uptr) (!(IS_INT(uptr)))
 
-typedef struct {
-  enum types type;
-} Type;
+#define TO_PTR(uptr) ((uptr) & 0x3FFF)
 
-typedef struct {
-  enum types type;
-  unsigned long hashcode;
-  union Value {
-    char *sval;
-    int ival;
-  } v;
-} Atom;
+typedef uint16_t uptr_t;
 
-typedef struct function {
-  enum types type;
-  int argeval;
-  char *name;
-  void *fn;
-} Function;
-
-typedef struct cons {
-  enum types type;
-  void *car;
-  void *cdr;
+typedef struct { 
+  uptr_t car;
+  uptr_t cdr;
 } Cons;
-
-typedef struct special {
-  enum types type;
-  int argeval;
-  char *name;
-  void *(*fn)(Cons **env, void *expr);
-} Special;
-
-/* Booleans and Nil **************************/
-
-extern void *TRUE;
-extern void *FALSE;
-extern void *NIL;
-
-/* Type Helpers ******************************/
-
-/* Gets an object's type */
-enum types type(void* expr);
-
-/* Lists */
-Cons* cons(void* car, void* cdr);
-void* append(void* p, void* form);
-
-/* Numerics */
-Atom* integer(int ival);
-
-/* Symbols */
-Atom* sym(char *s);
-unsigned long djb2_hash(char *str);
-
-/* Equality */
-int truthy(void* x);
-void* equal(void* x, void* y);
-
-/* Management */
-void rfree(void* x);
-
-/* Type Macros *******************************/
-
-#define CONS(x) ((Cons*)x)
-#define CAR(x)  ((Cons*)x)->car
-#define CDR(x)  ((Cons*)x)->cdr
-#define ATOM(x) ((Atom*)x)
-#define SPECIAL(x) ((Special*)x)
-#define IVAL(x) ((Atom*)x)->v.ival
-#define SVAL(x) ((Atom*)x)->v.sval
-#define HASHCODE(x) ((Atom*)x)->hashcode
-#define PRINT_TYPE(x) printf("type: %s\n", type(x) == CONS ? "CONS" : type(x) == INT ? "INT" : "SYMBOL");
-#define BOOL(expr) (expr ? TRUE : FALSE)
 
 #endif

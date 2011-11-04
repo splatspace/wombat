@@ -90,6 +90,7 @@ void *eval(Cons **env, void *expr) {
 int main(int argc, char *argv[]) {
 
   init_env();
+  init_mem();
 
   Cons *env = NIL;
   Special Car = { SPECIAL, 1, "car", &car };
