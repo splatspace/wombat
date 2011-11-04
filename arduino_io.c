@@ -42,11 +42,12 @@ static int serial_write(char c, FILE *stream)
   return 0;
 }
 
-void serial_init(unsigned int bittimer)
+void init_env()
 {
+  uint16_t bittimer = (F_CPU / 4800 / 16) - 1;
   /* Set the baud rate */
-  UBRR0H = (unsigned char) (bittimer >> 8);
-  UBRR0L = (unsigned char) bittimer;
+  UBRR0H = (uint8_t) (bittimer >> 8);
+  UBRR0L = (uint8_t) bittimer;
   /* set the framing to 8N1 */
   UCSR0C = (3 << UCSZ00);
   /* Engage! */
