@@ -29,6 +29,8 @@
 
 #endif
 
-#define DRF_UPTR(uptr) (*((uptr_t *)CPTR(uptr)))
+#define UPTR_PTR(uptr) ((uptr_t *)CPTR(uptr))
+#define BYTE_PTR(uptr) ((uint8_t *)CPTR(uptr))
+#define SYM_PTR(uptr) ((uint32_t *)CPTR(uptr))
 
 #endif

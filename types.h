@@ -1,8 +1,10 @@
 #ifndef _UBERLISP_TYPES_H
 #define _UBERLISP_TYPES_H
 
-#define INT_FLAG (1<<14)
-#define CADR_FLAG (1<<15)
+#define LIT_SYM_FLAG (((uint32_t)1)<<31)
+
+#define INT_FLAG (((uint16_t)1)<<14)
+#define CADR_FLAG (((uint16_t)1)<<15)
 
 #define IS_INT(uptr) ((uptr) & INT_FLAG)
 #define IS_PTR(uptr) (!(IS_INT(uptr)))

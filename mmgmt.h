@@ -8,6 +8,6 @@ uptr_t SEND_p;
 
 void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
-uptr_t symbol_alloc(char *name, int len);
+uptr_t symbol_alloc(char *name);
 
 #endif
