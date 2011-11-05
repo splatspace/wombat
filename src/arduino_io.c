@@ -20,15 +20,35 @@
  * Source: https://www.mainframe.cx/~ckuethe/avr-c-tutorial/lesson5.c
  */
 
+#include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
 
-static int serial_read(FILE *stream)
-{
-  while( !(UCSR0A & (1 << RXC0)) )
-    ;
-  return (int)UDR0;
+char STDOUT_BUCKET[32];
+PGM_P const STDIN_BUCKET = "((1 2 3) 4 5 () 6)\r\n";
+
+static int fake_read(FILE *stream) {
+  static PGM_P cur = STDIN_BUCKET;
+
+  if (*cur) {
+    cur++;
+    return *(cur - 1);
+  }
+
+  cur = STDIN_BUCKET;
+  return _FDEV_EOF;
+}
+
+static int fake_write(char c, FILE *stream) {
+  static char *cur = STDOUT_BUCKET;
+
+  if (cur == STDOUT_BUCKET + 31)
+    cur = STDOUT_BUCKET;
+
+  *cur = c;
+  cur++;
+  return 0;
 }
 
 static int serial_write(char c, FILE *stream)
@@ -42,9 +62,22 @@ static int serial_write(char c, FILE *stream)
   return 0;
 }
 
-void init_env()
+static int serial_read(FILE *stream)
 {
-  uint16_t bittimer = (F_CPU / 9600 / 16) - 1;
+  while( !(UCSR0A & (1 << RXC0)) )
+    ;
+  return (int)UDR0;
+}
+
+
+static FILE mystdin = FDEV_SETUP_STREAM(NULL, &serial_read, _FDEV_SETUP_READ);
+static FILE mystdout = FDEV_SETUP_STREAM(&serial_write, NULL, _FDEV_SETUP_WRITE);
+
+void init_env() {
+  stdin = &mystdin;
+  stdout = &mystdout;
+
+  uint16_t bittimer = (F_CPU / 57600 / 16) - 1;
   /* Set the baud rate */
   UBRR0H = (uint8_t) (bittimer >> 8);
   UBRR0L = (uint8_t) bittimer;
@@ -52,7 +85,5 @@ void init_env()
   UCSR0C = (3 << UCSZ00);
   /* Engage! */
   UCSR0B = (1 << RXEN0) | (1 << TXEN0);
-
-  fdevopen(serial_write, NULL); 
-  fdevopen(NULL, serial_read);
 }
+

@@ -5,16 +5,21 @@
 # devices, and set TTY accordingly:
 
 DEVICE     = atmega328p
+# DEVICE     = atmega128
 CLOCK      = 16000000UL
 # OBJECTS    = src/arduino_io.o src/alist.o src/main.o src/print_form.o src/read_form.o src/types.o
 OBJECTS    = src/arduino_io.o src/print_form.o src/read_form.o src/types.o src/test.o
 
 UNOTTY = /dev/ttyACM0
+UNOBAUD = 115200
+
 DUETTY = /dev/ttyUSB0
+DUEBAUD = 57600
+
 
 AVRDUDE = avrdude -c arduino -p $(DEVICE) 
-UNOOPTS = -P $(UNOTTY) -b 115200
-DUEOPTS = -P $(DUETTY) -b 57600
+UNOOPTS = -P $(UNOTTY) -b $(UNOBAUD)
+DUEOPTS = -P $(DUETTY) -b $(DUEBAUD)
 
 COMPILE = avr-gcc -g -I./include -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -DARDUINO -Wl,--defsym=__heap_start=0x800880
 
@@ -36,10 +41,10 @@ flash-due: all
 	$(AVRDUDE) $(DUEOPTS) -U flash:w:main.hex:i
 
 tty-uno:
-	screen $(UNOTTY) 19200
+	screen $(UNOTTY) $(UNOBAUD)
 
 tty-due:
-	screen $(DUETTY) 9600
+	screen $(DUETTY) $(DUEBAUD)
 
 clean:
 	rm -f main.hex main.elf $(OBJECTS)
@@ -49,7 +54,7 @@ main.elf: $(OBJECTS)
 
 main.hex: main.elf
 	rm -f main.hex
-	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
+	avr-objcopy -O ihex main.elf main.hex
 
 # Targets for code debugging and analysis:
 disasm:	main.elf

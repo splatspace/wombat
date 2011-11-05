@@ -25,6 +25,7 @@ int main() {
 
   printf("foobar: %s\n", buf);
 
+  /*
   memset(buf, 0, 7);
   unhash_sym(buf, lte);
 
@@ -42,6 +43,7 @@ int main() {
     print_form(read_form(stdin));
     printf("\n");
   }
+  */
 
   return 0;
 
