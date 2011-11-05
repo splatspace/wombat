@@ -1,7 +1,11 @@
+#ifdef ARDUINO
+#include <uberlisp/arduino_io.h>
+#else
+#include <uberlisp/fake_arduino.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 
-#include <uberlisp/uberlisp.h>
 #include <uberlisp/read_form.h>
 #include <uberlisp/print_form.h>
 

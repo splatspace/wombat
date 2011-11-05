@@ -2,14 +2,17 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <uberlisp/uberlisp.h>
 #include <uberlisp/types.h>
 
 void init_mem() {
-  CSTART_p = CEND_p = 0x880; /* Leave 128B for stack */
 
-  /* TODO: This isn't Arduino compatible */
+#ifdef ARDUINO
+  CSTART_p = CEND_p = UPTR(&__heap_start);
+  SSTART_p = SEND_p = UPTR(&__bss_end);
+#else
+  CSTART_p = CEND_p = 0x880; /* Leave 128B for stack */
   SSTART_p = SEND_p = UPTR(HEAP_p);
+#endif
 }
 
 uptr_t build_cons(uptr_t car, uptr_t cdr) {

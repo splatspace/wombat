@@ -3,7 +3,24 @@
 
 #include <stdint.h>
 
-#include <uberlisp/uberlisp.h>
+#ifdef ARDUINO
+
+typedef intptr_t uptr_t;
+
+#define UPTR(cptr) ((uptr_t)(cptr))
+#define CPTR(uptr) ((void *)(uptr))
+
+#else
+
+#include <uberlisp/fake_arduino.h>
+
+typedef uint16_t uptr_t;
+
+#define PSTR(string) string
+#define UPTR(cptr) ((uptr_t)((intptr_t)(cptr) - (intptr_t)MPOOL))
+#define CPTR(uptr) ((void *)((intptr_t)(uptr) + (intptr_t)MPOOL))
+
+#endif
 
 #define LIT_SYM_FLAG (((uint32_t)1)<<31)
 
@@ -32,8 +49,6 @@
 #define __CDR(uptr) (CONS_PTR(uptr)->cdr)
 #define CDR(uptr) (IS_CADR(__CDR(uptr)) ? VAL((uptr) + sizeof(uptr_t)) : __CDR(uptr))
 
-typedef uint16_t uptr_t;
-
 typedef struct { 
   uptr_t car;
   uptr_t cdr;
@@ -45,6 +60,9 @@ typedef struct {
 
 void hash_sym(uptr_t store, char *name);
 void unhash_sym(char *buf, uptr_t sym_p);
+
+extern char __heap_start;
+extern char __bss_end;
 
 uptr_t CSTART_p;
 uptr_t CEND_p;

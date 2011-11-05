@@ -1,7 +1,8 @@
 CC=gcc
 CFLAGS=-g -Wall -I./include
 
-OBJECTS=src/alist.o src/types.o src/print_form.o src/read_form.o src/main.o
+# OBJECTS=src/alist.o src/types.o src/print_form.o src/read_form.o src/main.o
+OBJECTS=src/types.o src/print_form.o src/read_form.o src/test.o src/fake_arduino.o
 SOURCES=$(patsubst %.o,%.c,$(OBJECTS))
 
 all: $(OBJECTS)

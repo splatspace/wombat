@@ -8,10 +8,11 @@ BAUD       = 115200
 
 DEVICE     = atmega328p
 CLOCK      = 16000000UL
-OBJECTS    = src/arduino_io.o src/alist.o src/main.o src/print_form.o src/read_form.o src/types.o
+# OBJECTS    = src/arduino_io.o src/alist.o src/main.o src/print_form.o src/read_form.o src/types.o
+OBJECTS    = src/arduino_io.o src/print_form.o src/read_form.o src/types.o src/test.o
 
 AVRDUDE = avrdude -c arduino -p $(DEVICE) -P $(TTY) -b $(BAUD)
-COMPILE = avr-gcc I./include -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -DARDUINO
+COMPILE = avr-gcc -I./include -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -DARDUINO -Wl,--defsym=__heap_start=0x800880
 
 all:	main.hex
 
