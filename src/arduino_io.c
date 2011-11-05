@@ -44,7 +44,7 @@ static int serial_write(char c, FILE *stream)
 
 void init_env()
 {
-  uint16_t bittimer = (F_CPU / 4800 / 16) - 1;
+  uint16_t bittimer = (F_CPU / 9600 / 16) - 1;
   /* Set the baud rate */
   UBRR0H = (uint8_t) (bittimer >> 8);
   UBRR0L = (uint8_t) bittimer;

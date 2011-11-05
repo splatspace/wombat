@@ -22,7 +22,9 @@ void print_list(uptr_t list) {
 
 void print_form(uptr_t form) {
 
-  if (IS_INT(form)) {
+  if (form == NIL) {
+    printf("()");
+  } else if (IS_INT(form)) {
     printf("%d", TO_INT(form));
   } else if (IS_SYM(form)) {
     char buf[7];

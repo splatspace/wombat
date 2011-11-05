@@ -37,7 +37,11 @@ int main() {
 
   printf("%d == %d\n%d == %d\n", foobar, foobar2, lte, lte2);
 
-  print_form(read_form(stdin));
+  while(1) {
+    printf("=> ");
+    print_form(read_form(stdin));
+    printf("\n");
+  }
 
   return 0;
 

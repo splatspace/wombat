@@ -3,16 +3,20 @@
 
 # Your TTY might be different.  Look for /dev/tty.serial, .modem, or USB
 # devices, and set TTY accordingly:
-TTY        = /dev/ttyACM0
-BAUD       = 115200
 
 DEVICE     = atmega328p
 CLOCK      = 16000000UL
 # OBJECTS    = src/arduino_io.o src/alist.o src/main.o src/print_form.o src/read_form.o src/types.o
 OBJECTS    = src/arduino_io.o src/print_form.o src/read_form.o src/types.o src/test.o
 
-AVRDUDE = avrdude -c arduino -p $(DEVICE) -P $(TTY) -b $(BAUD)
-COMPILE = avr-gcc -I./include -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -DARDUINO -Wl,--defsym=__heap_start=0x800880
+UNOTTY = /dev/ttyACM0
+DUETTY = /dev/ttyUSB0
+
+AVRDUDE = avrdude -c arduino -p $(DEVICE) 
+UNOOPTS = -P $(UNOTTY) -b 115200
+DUEOPTS = -P $(DUETTY) -b 57600
+
+COMPILE = avr-gcc -g -I./include -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -DARDUINO -Wl,--defsym=__heap_start=0x800880
 
 all:	main.hex
 
@@ -25,8 +29,17 @@ all:	main.hex
 .c.s:
 	$(COMPILE) -S $< -o $@
 
-flash:	all
-	$(AVRDUDE) -U flash:w:main.hex:i
+flash-uno: all
+	$(AVRDUDE) $(UNOOPTS) -U flash:w:main.hex:i
+
+flash-due: all
+	$(AVRDUDE) $(DUEOPTS) -U flash:w:main.hex:i
+
+tty-uno:
+	screen $(UNOTTY) 19200
+
+tty-due:
+	screen $(DUETTY) 9600
 
 clean:
 	rm -f main.hex main.elf $(OBJECTS)

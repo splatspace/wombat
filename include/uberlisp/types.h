@@ -24,8 +24,8 @@ typedef uint16_t uptr_t;
 
 #define LIT_SYM_FLAG (((uint32_t)1)<<31)
 
-#define INT_FLAG (((uint16_t)1)<<14)
-#define CADR_FLAG (((uint16_t)1)<<15)
+#define INT_FLAG (((uptr_t)1)<<14)
+#define CADR_FLAG (((uptr_t)1)<<15)
 
 #define IS_CADR(uptr) ((uptr) & CADR_FLAG)
 #define VAL(uptr) ((uptr) & ~CADR_FLAG)
