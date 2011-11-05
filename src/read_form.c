@@ -2,39 +2,44 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <uberlisp/types.h>
 #include <uberlisp/read_form.h>
 
-void* _read_integer(FILE* f) {
-  char buf[17]; /* 16 digit limit on numbers */
-  memset(buf, '\0', 17);
-  int n = 0;
+uptr_t _read_integer(FILE *f) {
+  char buf[7]; /* 6 digit limit on numbers */
+  memset(buf, '\0', 7);
+  int n;
   char c;
-  while ((c = getc(f))) {
-    if(isdigit(c)) {
-      buf[n++] = c;
-    } else {
+
+  for(n = 0; n < 6; ++n) {
+    c = getc(f);
+
+    if(isdigit(c))
+      buf[n] = c;
+    else {
       ungetc(c,f);
       break;
     }
   }
-  return (void*)integer(atoi(buf));
+  return INTERN_INT(atoi(buf));
 }
 
-void* _read_symbol(FILE *f) {
-  char buf[17]; /* 16 character limit on symbols */
-  memset(buf, '\0', 17);
-  int n = 0;
+uptr_t _read_symbol(FILE *f) {
+  char buf[7]; /* 6 character limit on symbols */
+  memset(buf, '\0', 7);
+  int n;
   char c;
-  while ((c = getc(f))) {
-    if(isalpha(c)) {
-      buf[n++] = c;
-    } else {
+  for (n = 0; n < 6; ++n) {
+    c = getc(f);
+    if(isalpha(c))
+      buf[n] = c;
+    else {
       ungetc(c,f);
       break;
     }
   }
-  return (void*)sym(buf);
+  return build_symbol(buf);
 }
 
 int _is_whitespace(char c) {
@@ -47,7 +52,7 @@ void _gobble_whitespace(FILE* f) {
   ungetc(c, f);
 }
 
-void* _read_list(FILE* f) {
+uptr_t _read_list(FILE* f) {
   _gobble_whitespace(f);
   char c = getc(f);
   if (c == ')')
@@ -57,14 +62,14 @@ void* _read_list(FILE* f) {
     return read_form(f);
   } else {
     ungetc(c, f);
-    void *car = read_form(f);
-    void *cdr = _read_list(f);
+    uptr_t car = read_form(f);
+    uptr_t cdr = _read_list(f);
     
-    return cons(car, cdr);
+    return build_cons(car, cdr);
   }
 }
 
-void* read_form(FILE* f) {
+uptr_t read_form(FILE* f) {
   char c = getc(f);
   if(isdigit(c)) {
     ungetc(c, f);
@@ -75,7 +80,8 @@ void* read_form(FILE* f) {
   } else if(c == '(') {
     return _read_list(f);
   } else if(c == '\'') {
-    return cons(sym("quote"), cons(read_form(f), NIL));
+    return build_cons(build_symbol("quote"), build_cons(read_form(f), NIL));
   }
   return read_form(f);
 }
+

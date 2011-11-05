@@ -2,14 +2,18 @@
 #include <stdio.h>
 
 #include <uberlisp/uberlisp.h>
+#include <uberlisp/read_form.h>
+#include <uberlisp/print_form.h>
 
 int main() {
   init_env();
   init_mem();
 
-  uptr_t foobar = symbol_alloc("foobar");
-  uptr_t lte = symbol_alloc("<=");
-  uptr_t five = symbol_alloc("fivec");
+  uptr_t foobar = build_symbol("foobar");
+  uptr_t lte = build_symbol("<=");
+  uptr_t five = build_symbol("fivec");
+  uptr_t lte2 = build_symbol("<=");
+  uptr_t foobar2 = build_symbol("foobar");
 
   char buf[7];
   memset(buf, 0, 7);
@@ -26,6 +30,10 @@ int main() {
   unhash_sym(buf, five);
 
   printf("fivec: %s\n", buf);
+
+  printf("%d == %d\n%d == %d\n", foobar, foobar2, lte, lte2);
+
+  print_form(read_form(stdin));
 
   return 0;
 

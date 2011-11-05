@@ -27,12 +27,21 @@ uptr_t build_cons(uptr_t car, uptr_t cdr) {
   return UPTR(new_cons);
 }
 
-uptr_t symbol_alloc(char *name) {
+uptr_t build_symbol(char *name) {
   hash_sym(SEND_p, name);
 
-  SEND_p += 4;
-  return SEND_p - 4;
+  uptr_t finder = SSTART_p;
+
+  while (*SYM_PTR(finder) != *SYM_PTR(SEND_p)) finder += 4;
+
+  if (finder == SEND_p)
+    SEND_p += 4;
+  else
+    memset(CPTR(SEND_p), 0, 4);
+  
+  return finder;
 }
+
 void hash_sym(uptr_t store, char *name) {
   int len = strlen(name);
   if (len > 6) len = 6;

@@ -6,44 +6,22 @@
 
 /* Printing *******************************/
 
-void print_form(void* form) {
-  switch(type(form)) {
-  case INT:
-    printf("%d", IVAL(form));
-    break;
-  case SYMBOL:
-    printf("%s", SVAL(form));
-    break;
-  case SPECIAL:
-    printf("#<special:%s>", ((Special*)form)->name);
-    break;
-  case FUNCTION:
-    printf("#<function>");
-    break;
-  case CONS:
-    printf("(");
-    do {
-      if(CAR(form)) {
-        print_form(CAR(form));
-        if(CDR(form)) {
-          if(type(CDR(form)) == CONS) {
-            if(CAR(CDR(form))) {
-              printf(" ");
-            }
-          } else {
-            printf(" . ");
-            print_form(CDR(form));
-            break;
-          }
-        }
-      } else {
-        /* printf("CAR was empty.\n"); */
-      }
-    } while((form = CDR(form)));
-    printf(")");
-    break;
+void print_form(uptr_t form) {
+
+  if (IS_INT(form)) {
+    printf("%d", TO_INT(form));
+  } else if (IS_SYM(form)) {
+    char buf[7];
+    memset(buf, 0, 7);
+    unhash_sym(buf, form);
+    printf("%s", buf);
+  } else {
+    printf("( list )");
   }
+
 }
+
+/*
 
 void dbg_pfn(void *form, int tabc) {
   char *tabs = malloc(3*tabc + 1);
@@ -95,3 +73,4 @@ void dbg_pfn(void *form, int tabc) {
 void dbg_pf(void *form) {
   dbg_pfn(form, 0);
 }
+*/
