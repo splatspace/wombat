@@ -1,4 +1,7 @@
-#include "fake_arduino.h"
+#include <stdlib.h>
+#include <string.h>
+
+#include <uberlisp/fake_arduino.h>
 
 void init_env() {
   SET_MEMP(MPOOL, malloc(0x900));

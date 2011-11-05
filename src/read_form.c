@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "types.h"
-#include "read_form.h"
+#include <uberlisp/types.h>
+#include <uberlisp/read_form.h>
 
 void* _read_integer(FILE* f) {
   char buf[17]; /* 16 digit limit on numbers */

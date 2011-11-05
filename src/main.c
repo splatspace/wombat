@@ -1,4 +1,4 @@
-#include "uberlisp.h"
+#include <uberlisp/uberlisp.h>
 
 void *eval(Cons **env, void *expr);
 

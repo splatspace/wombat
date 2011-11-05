@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "types.h"
-#include "alist.h"
-#include "print_form.h"
+#include <uberlisp/types.h>
+#include <uberlisp/alist.h>
+#include <uberlisp/print_form.h>
 
 void* get(Cons *alist, void* k) {
   if(CAR(alist)) {

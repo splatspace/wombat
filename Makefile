@@ -1,7 +1,7 @@
 CC=gcc
-CFLAGS=-g -Wall
+CFLAGS=-g -Wall -I./include
 
-OBJECTS=alist.o types.o print_form.o read_form.o main.o
+OBJECTS=src/alist.o src/types.o src/print_form.o src/read_form.o src/main.o
 SOURCES=$(patsubst %.o,%.c,$(OBJECTS))
 
 all: $(OBJECTS)
@@ -12,4 +12,4 @@ debug:
 	$(CC) -ggdb -o uberlisp $(OBJECTS)
 
 clean:
-	rm -f *.o uberlisp
+	rm -f src/*.o uberlisp
