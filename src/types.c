@@ -49,7 +49,10 @@ void hash_sym(uptr_t store, char *name) {
   uint32_t *hash = SYM_PTR(store);
 
   if (len <= 4) {
-    memcpy(hash, name, len);
+    int i;
+    for (i = 0; i < len; i++)
+      ((char*)hash)[i] = (char)toupper(name[i]);
+    
     *hash |= LIT_SYM_FLAG;
   } else {
     int i;
