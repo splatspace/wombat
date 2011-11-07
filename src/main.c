@@ -32,9 +32,27 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return NIL;
   }
 
+  if (hash_sym("def") == SVAL(fn)) {
+    assoc(env, CAR(args), eval(env, CADR(args)));
+    return CADR(args);
+  }
+
+  if (hash_sym("eval") == SVAL(fn))
+    return eval(env, eval(env, CAR(args)));
+
+  if (hash_sym("+") == SVAL(fn)) {
+    int sum = 0;
+    uptr_t rem_args = args;
+    while (rem_args) {
+      sum += eval(env, CAR(rem_args));
+      rem_args = CDR(rem_args);
+    }
+    return INTERN_INT(sum);
+  }
+
   printf_P(PSTR("ERROR: "));
   print_form(CAR(form));
-  printf_P(PSTR(" is not a function."));
+  printf_P(PSTR(" is not a function.\n"));
   return NIL;
 }
 

@@ -27,6 +27,10 @@ uptr_t _read_integer(FILE *f) {
   return INTERN_INT(atoi(buf));
 }
 
+int _is_sym_char(char c) {
+  return !isspace(c) && c != '(' && c != ')' && c != '\'' && c != '"';
+}
+
 uptr_t _read_symbol(FILE *f) {
   char buf[7]; /* 6 character limit on symbols */
   memset(buf, '\0', 7);
@@ -34,7 +38,7 @@ uptr_t _read_symbol(FILE *f) {
   char c;
   for (n = 0; n < 6; ++n) {
     c = getc(f);
-    if(isalpha(c))
+    if(_is_sym_char(c))
       buf[n] = c;
     else {
       ungetc(c,f);
@@ -76,13 +80,13 @@ uptr_t read_form(FILE* f) {
   if(isdigit(c)) {
     ungetc(c, f);
     return _read_integer(f);
-  } else if(isalpha(c)) {
-    ungetc(c, f);
-    return _read_symbol(f);
   } else if(c == '(') {
     return _read_list(f);
   } else if(c == '\'') {
     return build_cons(build_symbol("quote"), build_cons(read_form(f), NIL));
+  } else if (_is_sym_char(c)) {
+    ungetc(c, f);
+    return _read_symbol(f);
   }
   return read_form(f);
 }
