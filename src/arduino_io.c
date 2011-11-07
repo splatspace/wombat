@@ -1,7 +1,7 @@
 #include <avr/pgmspace.h>
 #include <avr/io.h>
-#include <util/delay.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <uberlisp/arduino_io.h>
 
 static int serial_write(char c, FILE *stream)
@@ -19,7 +19,12 @@ static int serial_read(FILE *stream)
 {
   while( !(UCSR0A & (1 << RXC0)) )
     ;
-  return (int)UDR0;
+  char c = UDR0;
+  if (c == '\r') 
+    serial_write('\n', stream);
+  else
+    serial_write(toupper(c), stream);
+  return (int)c;
 }
 
 

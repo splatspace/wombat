@@ -65,30 +65,12 @@ int main(int argc, char *argv[]) {
 
   uptr_t env = NIL;
 
-  /*
-  Special Car = { SPECIAL, 1, "car", &car };
-  Special Cdr = { SPECIAL, 1, "cdr", &cdr };
-  Special _Cons = { SPECIAL, 1, "cons", &_cons };
-  Special Quote = { SPECIAL, 0, "quote", &quote };
-  Special Eq = { SPECIAL, 1, "eq", &eq };
-  Special Eval = { SPECIAL, 1, "eval", &_eval };
-  Special Def = { SPECIAL, 0, "def", &def };
-
-  assoc(&env, sym("car"), (void*)&Car);
-  assoc(&env, sym("cdr"), (void*)&Cdr);
-  assoc(&env, sym("cons"), (void*)&_Cons);
-  assoc(&env, sym("quote"), (void*)&Quote);
-  assoc(&env, sym("eq"), (void*)&Eq);
-  assoc(&env, sym("eval"), (void*)&Eval);
-  assoc(&env, sym("def"), (void*)&Def);
-
-  assoc(&env, sym("ENV"), env);
-  */
-
+  uptr_t form;
   while(1) {
     printf_P(PSTR("=> "));
-    print_form(eval(&env, read_form(stdin)));
-    /* print_form(read_form(stdin)); */
+    form = read_form(stdin);
+    while(getc(stdin) != '\r');
+    print_form(eval(&env, form));
     printf_P(PSTR("\n"));
   }
 
