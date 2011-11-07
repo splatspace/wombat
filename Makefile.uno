@@ -54,7 +54,7 @@ main.elf: $(OBJECTS)
 
 main.hex: main.elf
 	rm -f main.hex
-	avr-objcopy -O ihex main.elf main.hex
+	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 
 # Targets for code debugging and analysis:
 disasm:	main.elf

@@ -13,6 +13,8 @@ void init_mem() {
   CSTART_p = CEND_p = 0x880; /* Leave 128B for stack */
   SSTART_p = SEND_p = UPTR(HEAP_p);
 #endif
+
+  memset(CPTR(SSTART_p), 0, CEND_p - SSTART_p);
 }
 
 uptr_t build_cons(uptr_t car, uptr_t cdr) {
