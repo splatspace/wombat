@@ -3,7 +3,6 @@
 
 #include <uberlisp/types.h>
 
-/* Reads the first Lisp form from f and returns it. */
-uptr_t read_form(FILE* f);
+uptr_t read_form();
 
 #endif

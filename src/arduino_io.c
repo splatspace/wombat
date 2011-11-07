@@ -22,13 +22,25 @@ static int serial_read(FILE *stream)
   return (int)UDR0;
 }
 
-
 static FILE mystdin = FDEV_SETUP_STREAM(NULL, &serial_read, _FDEV_SETUP_READ);
 static FILE mystdout = FDEV_SETUP_STREAM(&serial_write, NULL, _FDEV_SETUP_WRITE);
+
+void buf_stdin() {
+  char *buf = STDIN_BUF;
+
+  while ((*buf = (char)getchar()) != 4) {
+    if (isspace(*buf)) {
+      *buf = ' ';
+      if (buf > STDIN_BUF && *(buf-1) != ' ') ++buf;
+    } else ++buf;
+  }
+  *buf = '\0';
+}
 
 void init_env() {
   stdin = &mystdin;
   stdout = &mystdout;
+  *(char **)&STDIN_BUF = &__heap_start;
 
   uint16_t bittimer = (F_CPU / 57600 / 16) - 1;
   /* Set the baud rate */
