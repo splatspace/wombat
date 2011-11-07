@@ -1,98 +1,71 @@
+#include <uberlisp/arduino_io.h>
 #include <uberlisp/types.h>
+#include <uberlisp/alist.h>
+#include <avr/pgmspace.h>
 
-void *eval(Cons **env, void *expr);
+#include <uberlisp/read_form.h>
+#include <uberlisp/print_form.h>
 
-void* car(Cons** env, void* arglist) {
-  return CAR(CAR(arglist));
-}
+#include <stdio.h>
 
-void* cdr(Cons** env, void* arglist) {
-  return CDR(CAR(arglist));
-}
+uptr_t eval(uptr_t *env, uptr_t form);
 
-void* quote(Cons** env, void* expr) {
-  return CAR(expr);
-}
+uptr_t exec_special(uptr_t *env, uptr_t form) {
+  uptr_t fn = CAR(form);
+  uptr_t args = CDR(form);
 
-void* eq(Cons **env, void *arglist) {
-  dbg_pf(arglist);
-  return BOOL(CAR(arglist) == CAR(CDR(arglist)));
-}
+  if (hash_sym("quote") == SVAL(fn))
+    return CAR(args);
 
-void* _cons(Cons** env, void* expr) {
-  return cons(CAR(expr), CAR(CDR(expr)));
-}
+  if (hash_sym("car") == SVAL(fn))
+    return CAR(eval(env, CAR(args)));
 
-void *def(Cons **env, void *arglist) {
-  Atom *var = CAR(arglist);
-  Cons *binding = eval(env, CAR(CDR(arglist)));
-  assoc(env, sym(SVAL(var)), binding);
-  return binding;
-}
+  if (hash_sym("cdr") == SVAL(fn))
+    return CDR(eval(env, CAR(args)));
 
-void *_eval(Cons **env, void *arglist) {
-  return eval(env, CAR(arglist));
-}
+  if (hash_sym("cons") == SVAL(fn))
+    return build_cons(eval(env, CAR(args)), eval(env, CADR(args)));
 
-Cons *eval_list(Cons **env, Cons *list) {
-  if (list == NIL) return list;
-
-  void *car = eval(env, CAR(list));
-  void *cdr = eval_list(env, CDR(list));
-
-  return cons(car, cdr);
-}
-
-void *execute_special(Cons **env, Special *op, Cons *arglist) {
-  if (op->argeval) {
-    return op->fn(env, eval_list(env, arglist));
-  } else {
-    return op->fn(env, arglist);
+  if (hash_sym("print") == SVAL(fn)) {
+    print_form(eval(env, CAR(args)));
+    printf_P(PSTR("\n"));
+    return NIL;
   }
+
+  printf_P(PSTR("ERROR: "));
+  print_form(CAR(form));
+  printf_P(PSTR(" is not a function."));
+  return NIL;
 }
 
-void *eval(Cons **env, void *expr) {
-  switch (type(expr)) {
-    case SYMBOL:
-      ; /* GCC is stupid */
-      void *binding = get(*env, expr);
-      if (binding != NIL)
-        return binding;
-      else {
-        fprintf(stderr, "Error: Symbol '%s' is not defined.\n", SVAL(expr));
-        return NIL;
-      }
-    case CONS:
-      /* The empty list is self quoting */
-      if (expr == NIL)
-        return expr;
+uptr_t eval(uptr_t *env, uptr_t form) {
+  if (IS_INT(form) || IS_NIL(form))
+    return form;
 
-      void *op = eval(env, CAR(expr));
+  if (IS_SYM(form))
+    return eval(env, get(*env, form));
 
-      if (op == NIL) {
-        printf("nil op\n");
-        return NIL;
-      }
-
-      void *arglist = CDR(expr);
-      if(type(op) == SPECIAL)
-        return execute_special(env, op, arglist);
-      else {
-        printf("not special: %d\n", type(op));
-        return NIL;
-      }
-
-    default:
-      return expr;
+  if (IS_CONS(form)) {
+    if (!IS_SYM(CAR(form))) {
+      printf_P(PSTR("ERROR: "));
+      print_form(CAR(form));
+      printf_P(PSTR(" cannot be in function position.\n"));
+      return NIL;
+    }
+    return exec_special(env, form);
   }
+
+  return NIL;
 }
 
 int main(int argc, char *argv[]) {
 
-  init_env();
+  init_env(); // Poorly named. Has nothing to do with env alist.
   init_mem();
 
-  Cons *env = NIL;
+  uptr_t env = NIL;
+
+  /*
   Special Car = { SPECIAL, 1, "car", &car };
   Special Cdr = { SPECIAL, 1, "cdr", &cdr };
   Special _Cons = { SPECIAL, 1, "cons", &_cons };
@@ -109,17 +82,14 @@ int main(int argc, char *argv[]) {
   assoc(&env, sym("eval"), (void*)&Eval);
   assoc(&env, sym("def"), (void*)&Def);
 
-  /* NIL handled specially above. */
-  assoc(&env, sym("false"), FALSE);
-  assoc(&env, sym("true"), TRUE);
-
   assoc(&env, sym("ENV"), env);
+  */
 
   while(1) {
-    printf("=> ");
+    printf_P(PSTR("=> "));
     print_form(eval(&env, read_form(stdin)));
     /* print_form(read_form(stdin)); */
-    printf("\n");
+    printf_P(PSTR("\n"));
   }
 
   return 0;

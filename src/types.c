@@ -33,43 +33,45 @@ uptr_t build_cons(uptr_t car, uptr_t cdr) {
 }
 
 uptr_t build_symbol(char *name) {
-  hash_sym(SEND_p, name);
+  SVAL(SEND_p) = hash_sym(name);
 
   uptr_t finder = SSTART_p;
 
-  while (*SYM_PTR(finder) != *SYM_PTR(SEND_p)) finder += 4;
+  while (SVAL(finder) != SVAL(SEND_p)) finder += 4;
 
   if (finder == SEND_p)
     SEND_p += 4;
   else
-    memset(CPTR(SEND_p), 0, 4);
+    SVAL(SEND_p) = 0;
   
   return finder;
 }
 
-void hash_sym(uptr_t store, char *name) {
+uint32_t hash_sym(char *name) {
   int len = strlen(name);
   if (len > 6) len = 6;
 
-  uint32_t *hash = SYM_PTR(store);
+  uint32_t hash = 0;
 
   if (len <= 4) {
     int i;
     for (i = 0; i < len; i++)
-      ((char*)hash)[i] = (char)toupper(name[i]);
+      ((char*)&hash)[i] = (char)toupper(name[i]);
     
-    *hash |= LIT_SYM_FLAG;
+    hash |= LIT_SYM_FLAG;
   } else {
     int i;
     for (i = 0; i < len; ++i) {
       char cur = name[i];
 
       if (isalpha(cur))
-        *hash |= ((uint32_t)((char)toupper(cur) - 'A' + 1)) << (5*i);
+        hash |= ((uint32_t)((char)toupper(cur) - 'A' + 1)) << (5*i);
       else
-        *hash |= USCORE_HSH;
+        hash |= USCORE_HSH;
     }
   }
+
+  return hash;
 }
 
 void unhash_sym(char *buf, uptr_t sym_p) {

@@ -34,6 +34,7 @@ typedef uint16_t uptr_t;
 #define IS_PTR(uptr) (!(IS_INT(uptr)))
 #define IS_SYM(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) < SEND_p))
 #define IS_CONS(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) >= CSTART_p))
+#define IS_NIL(uptr) EQ(uptr, NIL)
 
 #define TO_PTR(uptr) ((uptr) & 0x3FFF)
 #define TO_INT(uptr) (((int16_t)((uptr)<<2))>>2)
@@ -47,7 +48,16 @@ typedef uint16_t uptr_t;
 
 #define CAR(uptr) (VAL(CONS_PTR(uptr)->car))
 #define __CDR(uptr) (CONS_PTR(uptr)->cdr)
-#define CDR(uptr) (IS_CADR(__CDR(uptr)) ? VAL((uptr) + sizeof(uptr_t)) : __CDR(uptr))
+#define CDR(uptr) (IS_CADR(__CDR(uptr)) ? (VAL(uptr) + sizeof(uptr_t)) : __CDR(uptr))
+
+#define CAAR(uptr) (CAR(CAR(uptr)))
+#define CADR(uptr) (CAR(CDR(uptr)))
+#define CDAR(uptr) (CDR(CAR(uptr)))
+#define CDDR(uptr) (CDR(CDR(uptr)))
+
+#define SVAL(symptr) (*SYM_PTR(symptr))
+
+#define EQ(uptr1, uptr2) (VAL(uptr1) == VAL(uptr2))
 
 typedef struct { 
   uptr_t car;
@@ -58,7 +68,7 @@ typedef struct {
 
 #define USCORE_HSH 27
 
-void hash_sym(uptr_t store, char *name);
+uint32_t hash_sym(char *name);
 void unhash_sym(char *buf, uptr_t sym_p);
 
 extern char __heap_start;

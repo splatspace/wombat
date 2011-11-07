@@ -3,16 +3,16 @@
 #include <uberlisp/alist.h>
 #include <uberlisp/print_form.h>
 
-void* get(Cons *alist, void* k) {
-  if(CAR(alist)) {
-    return (truthy(equal(CAR(CAR(alist)), k))) ? CDR(CAR(alist)) : get(CDR(alist), k);
-  } else if(CDR(alist)) {
-    return get(CDR(alist), k);
-  } else {
+uptr_t get(uptr_t alist, uptr_t k) {
+  if (IS_NIL(alist))
     return NIL;
-  }
+
+  if (EQ(CAAR(alist), k))
+    return CDAR(alist);
+
+  return get(CDR(alist), k);
 }
 
-void assoc(Cons **alist, void* k, void* v) {
-  *alist = cons(cons(k, v), *alist);
+void assoc(uptr_t *alist, uptr_t k, uptr_t v) {
+  *alist = build_cons(build_cons(k, v), *alist);
 }
