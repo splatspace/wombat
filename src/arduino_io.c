@@ -1,55 +1,8 @@
-/*
- * Copyright (c) 2008 Chris Kuethe <chris.kuethe@gmail.com>
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
-/* 
- * Modified from the original by Jon Distad and Alan Dipert
- *
- * Source: https://www.mainframe.cx/~ckuethe/avr-c-tutorial/lesson5.c
- */
-
 #include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
-
-char STDOUT_BUCKET[32];
-PGM_P const STDIN_BUCKET = "((1 2 3) 4 5 () 6)\r\n";
-
-static int fake_read(FILE *stream) {
-  static PGM_P cur = STDIN_BUCKET;
-
-  if (*cur) {
-    cur++;
-    return *(cur - 1);
-  }
-
-  cur = STDIN_BUCKET;
-  return _FDEV_EOF;
-}
-
-static int fake_write(char c, FILE *stream) {
-  static char *cur = STDOUT_BUCKET;
-
-  if (cur == STDOUT_BUCKET + 31)
-    cur = STDOUT_BUCKET;
-
-  *cur = c;
-  cur++;
-  return 0;
-}
+#include <uberlisp/arduino_io.h>
 
 static int serial_write(char c, FILE *stream)
 {
