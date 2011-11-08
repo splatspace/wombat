@@ -10,9 +10,31 @@
 
 uptr_t eval(uptr_t *env, uptr_t form);
 
+uptr_t let_star(uptr_t *env, uptr_t args) {
+  uptr_t bindings = CAR(args);
+  uptr_t body = CDR(args);
+  uptr_t local_env = *env;
+
+  while (bindings) {
+    assoc(&local_env, CAR(bindings), CADR(bindings));
+    bindings = CDDR(bindings);
+  }
+
+  uptr_t rval = NIL;
+  while(body) {
+    rval = eval(&local_env, CAR(body));
+    body = CDR(body);
+  }
+
+  return rval;
+}
+
 uptr_t exec_special(uptr_t *env, uptr_t form) {
   uptr_t fn = CAR(form);
   uptr_t args = CDR(form);
+
+  if (hash_sym("let*") == SVAL(fn))
+    return let_star(env, args);
 
   if (hash_sym("quote") == SVAL(fn))
     return CAR(args);
