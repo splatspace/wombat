@@ -21,7 +21,7 @@ AVRDUDE = avrdude -c arduino -p $(DEVICE)
 UNOOPTS = -P $(UNOTTY) -b $(UNOBAUD)
 DUEOPTS = -P $(DUETTY) -b $(DUEBAUD)
 
-COMPILE = avr-gcc -I./include -Wall -Werror -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -DARDUINO -Wl,--defsym=__heap_start=0x800800
+COMPILE = avr-gcc -I./include -Wall -Werror -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -DARDUINO -Wl,--defsym=__heap_start=0x800500
 
 all:	main.hex
 

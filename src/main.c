@@ -15,8 +15,16 @@ uptr_t _fn(uptr_t *env, uptr_t fn, uptr_t args) {
   uptr_t body = CDDR(fn);
   uptr_t local_env = *env;
 
+  /* char buf[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; */
+
   while (lvars && args) {
     assoc(&local_env, CAR(lvars), CAR(args));
+
+    /* unhash_sym(buf, CAR(lvars)); */
+    /* printf("%s:", buf); */
+    /* print_form(CAR(args)); */
+    /* printf("\n"); */
+
     lvars = CDR(lvars);
     args = CDR(args);
   }
@@ -103,6 +111,19 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return INTERN_INT(sum);
   }
 
+  if (hash_sym("<") == SVAL(fn)) {
+    while(1) {
+      if (IS_NIL(args))
+        return NIL;
+      if (IS_NIL(CDR(args)))
+        return CAR(args);
+      if (eval(env, CAR(args)) >= eval(env, CADR(args)))
+        return NIL;
+
+      args = CDR(args);
+    }
+  }
+
   if (hash_sym("-") == SVAL(fn)) {
     int diff = eval(env, CAR(args));
     uptr_t rem_args = CDR(args);
@@ -170,6 +191,7 @@ int main(int argc, char *argv[]) {
   assoc(&env, build_symbol("eval"), build_symbol("eval"));
   assoc(&env, build_symbol("+"), build_symbol("+"));
   assoc(&env, build_symbol("-"), build_symbol("-"));
+  assoc(&env, build_symbol("<"), build_symbol("<"));
 
   uptr_t form;
   while(1) {
