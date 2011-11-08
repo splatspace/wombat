@@ -68,6 +68,13 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   if (hash_sym("cdr") == SVAL(fn))
     return CDR(eval(env, CAR(args)));
 
+  if (hash_sym("if") == SVAL(fn)) {
+    if (eval(env, CADR(form)))
+      return CDDR(form) ? eval(env, CADDR(form)) : NIL;
+    else
+      return CDDDR(form) ? eval(env, CAR(CDDDR(form))) : NIL;
+  }
+
   if (hash_sym("cons") == SVAL(fn))
     return build_cons(eval(env, CAR(args)), eval(env, CADR(args)));
 
@@ -159,6 +166,7 @@ int main(int argc, char *argv[]) {
   assoc(&env, build_symbol("cons"), build_symbol("cons"));
   assoc(&env, build_symbol("print"), build_symbol("print"));
   assoc(&env, build_symbol("def"), build_symbol("def"));
+  assoc(&env, build_symbol("if"), build_symbol("if"));
   assoc(&env, build_symbol("eval"), build_symbol("eval"));
   assoc(&env, build_symbol("+"), build_symbol("+"));
   assoc(&env, build_symbol("-"), build_symbol("-"));

@@ -40,6 +40,8 @@ typedef intptr_t uptr_t;
 #define CADR(uptr) (CAR(CDR(uptr)))
 #define CDAR(uptr) (CDR(CAR(uptr)))
 #define CDDR(uptr) (CDR(CDR(uptr)))
+#define CADDR(uptr) (CAR(CDDR(uptr)))
+#define CDDDR(uptr) (CDR(CDDR(uptr)))
 
 #define SVAL(symptr) (*SYM_PTR(symptr))
 

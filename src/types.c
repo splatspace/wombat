@@ -62,7 +62,7 @@ uint32_t hash_sym(char *name) {
       if (isalpha(cur))
         hash |= ((uint32_t)((char)toupper(cur) - 'A' + 1)) << (5*i);
       else
-        hash |= USCORE_HSH;
+        hash |= ((uint32_t)USCORE_HSH) << (5*i);
     }
   }
 
