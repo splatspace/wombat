@@ -44,7 +44,7 @@ uptr_t let(uptr_t *env, uptr_t args) {
   uptr_t local_env = *env;
 
   while (bindings) {
-    assoc(&local_env, CAR(bindings), CADR(bindings));
+    assoc(&local_env, CAR(bindings), eval(&local_env, CADR(bindings)));
     bindings = CDDR(bindings);
   }
 
