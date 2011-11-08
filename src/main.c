@@ -33,8 +33,9 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   }
 
   if (hash_sym("def") == SVAL(fn)) {
-    assoc(env, CAR(args), eval(env, CADR(args)));
-    return CADR(args);
+    uptr_t binding = eval(env, CADR(args));
+    assoc(env, CAR(args), binding);
+    return binding;
   }
 
   if (hash_sym("eval") == SVAL(fn))
@@ -50,6 +51,16 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return INTERN_INT(sum);
   }
 
+  if (hash_sym("-") == SVAL(fn)) {
+    int diff = eval(env, CAR(args));
+    uptr_t rem_args = CDR(args);
+    while (rem_args) {
+      diff -= eval(env, CAR(rem_args));
+      rem_args = CDR(rem_args);
+    }
+    return INTERN_INT(diff);
+  }
+
   printf_P(PSTR("ERROR: "));
   print_form(CAR(form));
   printf_P(PSTR(" is not a function.\n"));
@@ -61,7 +72,7 @@ uptr_t eval(uptr_t *env, uptr_t form) {
     return form;
 
   if (IS_SYM(form))
-    return eval(env, get(*env, form));
+    return get(*env, form);
 
   if (IS_CONS(form)) {
     if (!IS_SYM(CAR(form))) {
@@ -85,6 +96,12 @@ int main(int argc, char *argv[]) {
 
   uptr_t form;
   while(1) {
+    printf_P(PSTR("Total mem:\t%dB\nFree mem:\t%dB\tUsed mem:\t%dB\nCons mem:\t%dB\tSymbol mem:\t%dB\n"), 
+        (CEND_p - SSTART_p), 
+        (CSTART_p - SEND_p), 
+        (CEND_p - CSTART_p)+(SEND_p-SSTART_p),
+        (CEND_p - CSTART_p), 
+        (SEND_p - SSTART_p));
     printf_P(PSTR("=> "));
     form = read_form(stdin);
     while(getc(stdin) != '\r');
