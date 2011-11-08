@@ -10,14 +10,15 @@
 
 uptr_t eval(uptr_t *env, uptr_t form);
 
-uptr_t fn(uptr_t *env, uptr_t args) {
-  uptr_t bindings = CAR(args);
-  uptr_t body = CDR(args);
+uptr_t _fn(uptr_t *env, uptr_t fn, uptr_t args) {
+  uptr_t lvars = CADR(fn);
+  uptr_t body = CDDR(fn);
   uptr_t local_env = *env;
 
-  while (bindings) {
-    assoc(&local_env, CAR(bindings), CADR(bindings));
-    bindings = CDDR(bindings);
+  while (lvars && args) {
+    assoc(&local_env, CAR(lvars), CAR(args));
+    lvars = CDR(lvars);
+    args = CDR(args);
   }
 
   uptr_t rval = NIL;
@@ -48,9 +49,15 @@ uptr_t let(uptr_t *env, uptr_t args) {
   return rval;
 }
 
-uptr_t exec_special(uptr_t *env, uptr_t fn, uptr_t args) {
+uptr_t exec_special(uptr_t *env, uptr_t form) {
+  uptr_t fn = CAR(form);
+  uptr_t args = CDR(form);
+
   if (hash_sym("let") == SVAL(fn))
     return let(env, args);
+
+  if (hash_sym("fn") == SVAL(fn))
+    return form;
 
   if (hash_sym("quote") == SVAL(fn))
     return CAR(args);
@@ -105,6 +112,13 @@ uptr_t exec_special(uptr_t *env, uptr_t fn, uptr_t args) {
   return NIL;
 }
 
+uptr_t eval_list(uptr_t *env, uptr_t list) {
+  if (IS_NIL(list))
+    return NIL;
+
+  return build_cons(eval(env, CAR(list)), eval_list(env, CDR(list)));
+}
+
 uptr_t eval(uptr_t *env, uptr_t form) {
   if (IS_INT(form) || IS_NIL(form))
     return form;
@@ -115,11 +129,10 @@ uptr_t eval(uptr_t *env, uptr_t form) {
   if (IS_CONS(form)) {
     uptr_t fn = eval(env, CAR(form));
     if (IS_SYM(fn))
-      return exec_special(env, fn, CDR(form));
+      return exec_special(env, form);
 
-    if(IS_CONS(fn)) {
-      printf_P(PSTR("SHIT JUST GOT REAL\n"));
-      return NIL;
+    if(IS_CONS(fn) && SVAL(CAR(fn) == hash_sym("fn"))) {
+      return _fn(env, fn, eval_list(env, CDR(form)));
     }
 
     printf_P(PSTR("ERROR: "));
@@ -139,6 +152,7 @@ int main(int argc, char *argv[]) {
 
   uptr_t env = NIL;
   assoc(&env, build_symbol("let"), build_symbol("let"));
+  assoc(&env, build_symbol("fn"), build_symbol("fn"));
   assoc(&env, build_symbol("quote"), build_symbol("quote"));
   assoc(&env, build_symbol("car"), build_symbol("car"));
   assoc(&env, build_symbol("cdr"), build_symbol("cdr"));
