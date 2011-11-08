@@ -6,13 +6,8 @@
 
 void init_mem() {
 
-#ifdef ARDUINO
   CSTART_p = CEND_p = UPTR(&__heap_start);
   SSTART_p = SEND_p = UPTR(&__bss_end);
-#else
-  CSTART_p = CEND_p = 0x880; /* Leave 128B for stack */
-  SSTART_p = SEND_p = UPTR(HEAP_p);
-#endif
 
   memset(CPTR(SSTART_p), 0, CEND_p - SSTART_p);
 }
