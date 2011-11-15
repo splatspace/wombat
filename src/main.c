@@ -2,9 +2,11 @@
 #include <uberlisp/types.h>
 #include <uberlisp/alist.h>
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 
 #include <uberlisp/read_form.h>
 #include <uberlisp/print_form.h>
+#include <uberlisp/registers.h>
 
 #include <stdio.h>
 
@@ -15,16 +17,8 @@ uptr_t _fn(uptr_t *env, uptr_t fn, uptr_t args) {
   uptr_t body = CDDR(fn);
   uptr_t local_env = *env;
 
-  /* char buf[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; */
-
   while (lvars && args) {
     assoc(&local_env, CAR(lvars), CAR(args));
-
-    /* unhash_sym(buf, CAR(lvars)); */
-    /* printf("%s:", buf); */
-    /* print_form(CAR(args)); */
-    /* printf("\n"); */
-
     lvars = CDR(lvars);
     args = CDR(args);
   }
@@ -134,6 +128,31 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return INTERN_INT(diff);
   }
 
+  if (hash_sym("SREG") == SVAL(fn)) {
+    uint32_t regsym = SVAL(CAR(args));
+
+    Reg *cur;
+    for (cur = Regmap; cur < REGEND; ++cur) {
+      printf_P(PSTR("cur->symhsh: %lu\tregsym: %lu\n"), cur->symhsh, regsym);
+      if (regsym == cur->symhsh) break;
+    }
+
+    if (cur == REGEND) {
+      printf_P(PSTR("ERROR: "));
+      print_form(CAR(args));
+      printf_P(PSTR(" is not a valid register.\n"));
+      return NIL;
+    }
+
+    *REG_PTR(cur) = eval(env, CADR(args));
+    return NIL;
+  }
+
+  if (hash_sym("slp") == SVAL(fn)) {
+    _delay_ms(eval(env, CAR(args)));
+    return NIL;
+  }
+
   printf_P(PSTR("ERROR: "));
   print_form(fn);
   printf_P(PSTR(" is not a function.\n"));
@@ -192,6 +211,13 @@ int main(int argc, char *argv[]) {
   assoc(&env, build_symbol("+"), build_symbol("+"));
   assoc(&env, build_symbol("-"), build_symbol("-"));
   assoc(&env, build_symbol("<"), build_symbol("<"));
+  assoc(&env, build_symbol("reg"), build_symbol("reg"));
+  assoc(&env, build_symbol("sreg"), build_symbol("sreg"));
+  assoc(&env, build_symbol("slp"), build_symbol("slp"));
+
+  printf("env: ");
+  print_form(env);
+  printf("\n");
 
   uptr_t form;
   while(1) {

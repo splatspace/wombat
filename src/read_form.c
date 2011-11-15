@@ -30,7 +30,7 @@ uptr_t _read_integer(FILE *f, char pfx) {
 }
 
 int _is_sym_char(char c) {
-  return !isspace(c) && c != '(' && c != ')' && c != '\'' && c != '"';
+  return !isspace(c) && c != '(' && c != ')' && c != '\'' && c != '"' && c != '.';
 }
 
 uptr_t _read_symbol(FILE *f, char pfx) {
