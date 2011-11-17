@@ -21,6 +21,7 @@ typedef intptr_t uptr_t;
 #define IS_SYM(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) < SEND_p))
 #define IS_CONS(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) >= CSTART_p))
 #define IS_NIL(uptr) EQ(uptr, NIL)
+#define IS_REG(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) < 0x100))
 
 #define TO_PTR(uptr) ((uptr) & 0x3FFF)
 #define TO_INT(uptr) (((int16_t)((uptr)<<2))>>2)
