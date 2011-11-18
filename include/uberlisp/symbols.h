@@ -15,7 +15,10 @@
    | (((uint32_t) c4)<<24)       \
    | LIT_SYM_FLAG)
 
-#define __CHRNUM(c) ((c == '_') ? ((uint32_t)USCORE_HSH) : ((uint32_t) (c - 'A' + 1)))
+#define __CHRNUM(c)                                                   \
+  (c ?                                                                \
+  (c == '_') ? ((uint32_t)USCORE_HSH) : ((uint32_t)(c - 'A' + 1))     \
+   : (uint32_t)0)
 
 #define __SHASH6(c1, c2, c3, c4, c5, c6) \
   (((uint32_t) 0)                        \
