@@ -1,7 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
 #include <uberlisp/types.h>
 
 void init_mem() {
@@ -26,6 +22,14 @@ uptr_t build_cons(uptr_t car, uptr_t cdr) {
   new_cons->cdr = cdr;
   return UPTR(new_cons);
 }
+
+uptr_t build_symbol_P(PGM_P name) {
+  char *buf = ((char*)SEND_p) + 4;
+  strcpy_P(buf, name);
+  uptr_t rval = build_symbol(buf);
+  memset(buf, 0, strlen(buf));
+  return rval;
+} 
 
 uptr_t build_symbol(char *name) {
   SVAL(SEND_p) = hash_sym(name);

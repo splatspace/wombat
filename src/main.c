@@ -129,7 +129,15 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   }
 
   if (hash_sym("sreg") == SVAL(fn)) {
-    *BYTE_PTR(eval(env, CAR(args))) = eval(env, CADR(args));
+    uptr_t reg = eval(env, CAR(args));
+    if (IS_REG(reg))
+      *BYTE_PTR(reg) = eval(env, CADR(args));
+    else {
+      printf_P(PSTR("Invalid register: "));
+      print_form(reg);
+      printf_P(PSTR("\n"));
+    }
+
     return NIL;
   }
 
@@ -163,7 +171,7 @@ uptr_t eval(uptr_t *env, uptr_t form) {
     if (IS_SYM(fn))
       return exec_special(env, form);
 
-    if(IS_CONS(fn) && SVAL(CAR(fn) == hash_sym("fn"))) {
+    if(IS_CONS(fn) && SVAL(CAR(fn)) == hash_sym("fn")) {
       return _fn(env, fn, eval_list(env, CDR(form)));
     }
 
@@ -183,25 +191,25 @@ int main(int argc, char *argv[]) {
   init_mem();
 
   uptr_t env = NIL;
-  assoc(&env, build_symbol("let"), build_symbol("let"));
-  assoc(&env, build_symbol("fn"), build_symbol("fn"));
-  assoc(&env, build_symbol("quote"), build_symbol("quote"));
-  assoc(&env, build_symbol("car"), build_symbol("car"));
-  assoc(&env, build_symbol("cdr"), build_symbol("cdr"));
-  assoc(&env, build_symbol("cons"), build_symbol("cons"));
-  assoc(&env, build_symbol("print"), build_symbol("print"));
-  assoc(&env, build_symbol("def"), build_symbol("def"));
-  assoc(&env, build_symbol("if"), build_symbol("if"));
-  assoc(&env, build_symbol("eval"), build_symbol("eval"));
-  assoc(&env, build_symbol("+"), build_symbol("+"));
-  assoc(&env, build_symbol("-"), build_symbol("-"));
-  assoc(&env, build_symbol("<"), build_symbol("<"));
-  assoc(&env, build_symbol("sreg"), build_symbol("sreg"));
-  assoc(&env, build_symbol("slp"), build_symbol("slp"));
+  assoc(&env, build_symbol_P(PSTR("LET")), build_symbol_P(PSTR("LET")));
+  assoc(&env, build_symbol_P(PSTR("FN")), build_symbol_P(PSTR("FN")));
+  assoc(&env, build_symbol_P(PSTR("QUOTE")), build_symbol_P(PSTR("QUOTE")));
+  assoc(&env, build_symbol_P(PSTR("CAR")), build_symbol_P(PSTR("CAR")));
+  assoc(&env, build_symbol_P(PSTR("CDR")), build_symbol_P(PSTR("CDR")));
+  assoc(&env, build_symbol_P(PSTR("CONS")), build_symbol_P(PSTR("CONS")));
+  assoc(&env, build_symbol_P(PSTR("PRINT")), build_symbol_P(PSTR("PRINT")));
+  assoc(&env, build_symbol_P(PSTR("DEF")), build_symbol_P(PSTR("DEF")));
+  assoc(&env, build_symbol_P(PSTR("IF")), build_symbol_P(PSTR("IF")));
+  assoc(&env, build_symbol_P(PSTR("EVAL")), build_symbol_P(PSTR("EVAL")));
+  assoc(&env, build_symbol_P(PSTR("+")), build_symbol_P(PSTR("+")));
+  assoc(&env, build_symbol_P(PSTR("-")), build_symbol_P(PSTR("-")));
+  assoc(&env, build_symbol_P(PSTR("<")), build_symbol_P(PSTR("<")));
+  assoc(&env, build_symbol_P(PSTR("SREG")), build_symbol_P(PSTR("SREG")));
+  assoc(&env, build_symbol_P(PSTR("SLP")), build_symbol_P(PSTR("SLP")));
 
   // Registers
-  assoc(&env, build_symbol("_DDRB"), 0x04 + __SFR_OFFSET);
-  assoc(&env, build_symbol("_PORTB"), 0x05 + __SFR_OFFSET);
+  assoc(&env, build_symbol_P(PSTR("_DDRB")), DDRB);
+  assoc(&env, build_symbol_P(PSTR("_PORTB")), PORTB);
 
   printf_P(PSTR("env: "));
   print_form(env);
