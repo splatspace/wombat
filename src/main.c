@@ -191,25 +191,7 @@ int main(int argc, char *argv[]) {
   init_mem();
 
   uptr_t env = NIL;
-  assoc(&env, build_symbol_P(PSTR("LET")), build_symbol_P(PSTR("LET")));
-  assoc(&env, build_symbol_P(PSTR("FN")), build_symbol_P(PSTR("FN")));
-  assoc(&env, build_symbol_P(PSTR("QUOTE")), build_symbol_P(PSTR("QUOTE")));
-  assoc(&env, build_symbol_P(PSTR("CAR")), build_symbol_P(PSTR("CAR")));
-  assoc(&env, build_symbol_P(PSTR("CDR")), build_symbol_P(PSTR("CDR")));
-  assoc(&env, build_symbol_P(PSTR("CONS")), build_symbol_P(PSTR("CONS")));
-  assoc(&env, build_symbol_P(PSTR("PRINT")), build_symbol_P(PSTR("PRINT")));
-  assoc(&env, build_symbol_P(PSTR("DEF")), build_symbol_P(PSTR("DEF")));
-  assoc(&env, build_symbol_P(PSTR("IF")), build_symbol_P(PSTR("IF")));
-  assoc(&env, build_symbol_P(PSTR("EVAL")), build_symbol_P(PSTR("EVAL")));
-  assoc(&env, build_symbol_P(PSTR("+")), build_symbol_P(PSTR("+")));
-  assoc(&env, build_symbol_P(PSTR("-")), build_symbol_P(PSTR("-")));
-  assoc(&env, build_symbol_P(PSTR("<")), build_symbol_P(PSTR("<")));
-  assoc(&env, build_symbol_P(PSTR("SREG")), build_symbol_P(PSTR("SREG")));
-  assoc(&env, build_symbol_P(PSTR("SLP")), build_symbol_P(PSTR("SLP")));
-
-  // Registers
-  assoc(&env, build_symbol_P(PSTR("_DDRB")), DDRB);
-  assoc(&env, build_symbol_P(PSTR("_PORTB")), PORTB);
+  init_syms(&env);
 
   printf_P(PSTR("env: "));
   print_form(env);

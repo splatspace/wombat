@@ -1,5 +1,7 @@
-#ifndef _ALIST_H
-#define _ALIST_H
+#ifndef _UBERLISP_ALIST_H
+#define _UBERLISP_ALIST_H
+
+#include <uberlisp/types.h>
 
 /* Returns value at k or NIL if not found. */
 uptr_t get(uptr_t alist, uptr_t k);

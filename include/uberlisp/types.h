@@ -5,9 +5,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
-#include <avr/pgmspace.h>
 
 typedef intptr_t uptr_t;
+
+#include <avr/pgmspace.h>
+#include <uberlisp/symbols.h>
 
 #define UPTR(cptr) ((uptr_t)(cptr))
 #define CPTR(uptr) ((void *)(uptr))
@@ -59,8 +61,6 @@ typedef struct {
 
 #define NIL ((uptr_t)0)
 
-#define USCORE_HSH 27
-
 uint32_t hash_sym(char *name);
 void unhash_sym(char *buf, uptr_t sym_p);
 
@@ -74,7 +74,7 @@ uptr_t SEND_p;
 
 void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
-uptr_t build_symbol_P(PGM_P name);
+void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
 
 #endif

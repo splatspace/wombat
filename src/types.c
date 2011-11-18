@@ -23,13 +23,10 @@ uptr_t build_cons(uptr_t car, uptr_t cdr) {
   return UPTR(new_cons);
 }
 
-uptr_t build_symbol_P(PGM_P name) {
-  char *buf = ((char*)SEND_p) + 4;
-  strcpy_P(buf, name);
-  uptr_t rval = build_symbol(buf);
-  memset(buf, 0, strlen(buf));
-  return rval;
-} 
+void __mk_sym(uint32_t s) {
+  SVAL(SEND_p) = s;
+  SEND_p += 4;
+}
 
 uptr_t build_symbol(char *name) {
   SVAL(SEND_p) = hash_sym(name);
