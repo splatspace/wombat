@@ -48,8 +48,8 @@ void init_syms(uptr_t *env) {
 
   // Registers
   __mk_sym(S__DDRB);
-  assoc(env, (SEND_p-4), DDRB);
+  assoc(env, (SEND_p-4), (0x04 + __SFR_OFFSET));
 
   __mk_sym(S__PORTB);
-  assoc(env, (SEND_p-4), PORTB);
+  assoc(env, (SEND_p-4), (0x05 + __SFR_OFFSET));
 }
