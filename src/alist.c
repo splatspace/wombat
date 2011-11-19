@@ -7,12 +7,12 @@ uptr_t get(uptr_t alist, uptr_t k) {
   if (IS_NIL(alist))
     return NIL;
 
-  if (EQ(CAAR(alist), k))
-    return CDAR(alist);
+  if (EQ(CAR(alist), k))
+    return CADR(alist);
 
-  return get(CDR(alist), k);
+  return get(CDDR(alist), k);
 }
 
 void assoc(uptr_t *alist, uptr_t k, uptr_t v) {
-  *alist = build_cons(build_cons(k, v), *alist);
+  *alist = build_cons(k, build_cons(v, *alist));
 }
