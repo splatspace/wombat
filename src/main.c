@@ -51,102 +51,137 @@ uptr_t let(uptr_t *env, uptr_t args) {
   return rval;
 }
 
+uptr_t loop(uptr_t *env, uptr_t form) {
+  uptr_t bindings = CAR(form);
+  uptr_t body = CDR(form);
+  uptr_t local_env = *env;
+
+  while (bindings) {
+    assoc(&local_env, CAR(bindings), eval(&local_env, CADR(bindings)));
+    bindings = CDDR(bindings);
+  }
+
+  uptr_t rval = NIL;
+  while (body) {
+    if (IS_SYM(CAAR(body)) && SVAL(CAAR(body)) == S_RECUR) {
+      uptr_t new_env = *env;
+      uptr_t new_vals = CDAR(body);
+      bindings = CAR(form);
+      while (new_vals && bindings) {
+        assoc(&new_env, CAR(bindings), eval(&local_env, CAR(new_vals)));
+        bindings = CDDR(bindings);
+        new_vals = CDR(new_vals);
+      }
+      body = CDR(form);
+      local_env = new_env;
+    } else {
+      rval = eval(&local_env, CAR(body));
+      body = CDR(body);
+    }
+  }
+ 
+  return rval;
+}
+
 uptr_t exec_special(uptr_t *env, uptr_t form) {
   uptr_t fn = CAR(form);
   uptr_t args = CDR(form);
 
   switch(SVAL(fn)) {
-    case S_LET:
-      return let(env, args);
+  case S_LET:
+    return let(env, args);
 
-    case S_FN:
-      return form;
+  case S_FN:
+    return form;
 
-    case S_QUOTE:
-      return CAR(args);
+  case S_LOOP:
+    return loop(env, args);
 
-    case S_CAR:
-      return CAR(eval(env, CAR(args)));
+  case S_QUOTE:
+    return CAR(args);
 
-    case S_CDR:
-      return CDR(eval(env, CAR(args)));
+  case S_CAR:
+    return CAR(eval(env, CAR(args)));
 
-    case S_IF:
-      if (eval(env, CADR(form)))
-        return CDDR(form) ? eval(env, CADDR(form)) : NIL;
-      else
-        return CDDDR(form) ? eval(env, CAR(CDDDR(form))) : NIL;
+  case S_CDR:
+    return CDR(eval(env, CAR(args)));
+
+  case S_IF:
+    if (eval(env, CADR(form)))
+      return CDDR(form) ? eval(env, CADDR(form)) : NIL;
+    else
+      return CDDDR(form) ? eval(env, CAR(CDDDR(form))) : NIL;
     
-    case S_CONS:
-      return build_cons(eval(env, CAR(args)), eval(env, CADR(args)));
+  case S_CONS:
+    return build_cons(eval(env, CAR(args)), eval(env, CADR(args)));
 
-    case S_PRINT:
-      print_form(eval(env, CAR(args)));
-      printf_P(PSTR("\n"));
-      return NIL;
+  case S_PRINT:
+    print_form(eval(env, CAR(args)));
+    printf_P(PSTR("\n"));
+    return NIL;
 
-    case S_DEF: {
-      uptr_t binding = eval(env, CADR(args));
-      assoc(env, CAR(args), binding);
-      return binding;
+  case S_DEF: {
+    uptr_t binding = eval(env, CADR(args));
+    assoc(env, CAR(args), binding);
+    return binding;
+  }
+
+  case S_EVAL:
+    return eval(env, eval(env, CAR(args)));
+
+  case S_PLUS: {
+    int sum = 0;
+    uptr_t rem_args = args;
+    while (rem_args) {
+      sum += eval(env, CAR(rem_args));
+      rem_args = CDR(rem_args);
     }
+    return INTERN_INT(sum);
+  }
 
-    case S_EVAL:
-      return eval(env, eval(env, CAR(args)));
+  case S_LT:
+    while(1) {
+      if (IS_NIL(args))
+        return NIL;
+      if (IS_NIL(CDR(args)))
+        return CAR(args);
+      if (eval(env, CAR(args)) >= eval(env, CADR(args)))
+        return NIL;
 
-    case S_PLUS: {
-      int sum = 0;
-      uptr_t rem_args = args;
-      while (rem_args) {
-        sum += eval(env, CAR(rem_args));
-        rem_args = CDR(rem_args);
-      }
-      return INTERN_INT(sum);
+      args = CDR(args);
     }
-
-    case S_LT:
-      while(1) {
-        if (IS_NIL(args))
-          return NIL;
-        if (IS_NIL(CDR(args)))
-          return CAR(args);
-        if (eval(env, CAR(args)) >= eval(env, CADR(args)))
-          return NIL;
-
-        args = CDR(args);
-      }
       
-    case S_MINUS: {
-      int diff = eval(env, CAR(args));
-      uptr_t rem_args = CDR(args);
-      while (rem_args) {
-        diff -= eval(env, CAR(rem_args));
-        rem_args = CDR(rem_args);
-      }
-      return INTERN_INT(diff);
+  case S_MINUS: {
+    int diff = eval(env, CAR(args));
+    uptr_t rem_args = CDR(args);
+    while (rem_args) {
+      diff -= eval(env, CAR(rem_args));
+      rem_args = CDR(rem_args);
     }
+    return INTERN_INT(diff);
+  }
 
-    case S_SREG: {
-      uptr_t reg = eval(env, CAR(args));
-      if (IS_REG(reg))
-        *BYTE_PTR(reg) = eval(env, CADR(args));
-      else {
-        printf_P(PSTR("Invalid register: "));
-        print_form(reg);
-        printf_P(PSTR("\n"));
-      }
-      return NIL;
+  case S_SREG: {
+    uptr_t reg = eval(env, CAR(args));
+    if (IS_REG(reg))
+      *BYTE_PTR(reg) = eval(env, CADR(args));
+    else {
+      printf_P(PSTR("Invalid register: "));
+      print_form(reg);
+      printf_P(PSTR("\n"));
     }
+    return NIL;
+  }
 
-    case S_SLP:
-      _delay_ms(TO_INT(eval(env, CAR(args))));
-      return NIL;
+  case S_SLP:
+    _delay_ms(TO_INT(eval(env, CAR(args))));
+    return NIL;
 
-    default:
-      printf_P(PSTR("ERROR: "));
-      print_form(fn);
-      printf_P(PSTR(" is not a function.\n"));
-      return NIL;
+  default:
+    printf_P(PSTR("ERROR: "));
+    print_form(fn);
+    printf_P(PSTR(" is not a function.\n"));
+    return NIL;
   }
 }
 

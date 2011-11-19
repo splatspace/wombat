@@ -44,6 +44,8 @@
 #define S_LT __SHASH4('<', 0, 0, 0)
 #define S_SREG __SHASH4('S', 'R', 'E', 'G')
 #define S_SLP __SHASH4('S', 'L', 'P', 0)
+#define S_LOOP __SHASH4('L', 'O', 'O', 'P')
+#define S_RECUR __SHASH6('R', 'E', 'C', 'U', 'R', 0)
 
 #define S__DDRB __SHASH6('_', 'D', 'D', 'R', 'B', 0)
 #define S__PORTB __SHASH6('_', 'P', 'O', 'R', 'T', 'B')
