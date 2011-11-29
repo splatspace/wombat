@@ -13,7 +13,7 @@ typedef intptr_t uptr_t;
 #include <uberlisp/gc.h>
 
 #define UPTR(cptr) ((uptr_t)(cptr))
-#define CPTR(uptr) ((void *)(uptr))
+#define CPTR(uptr) ((void *)TO_PTR(uptr))
 
 #define LIT_SYM_FLAG (((uint32_t)1)<<31)
 
@@ -26,8 +26,8 @@ typedef intptr_t uptr_t;
 
 #define IS_INT(uptr) ((uptr) & INT_FLAG)
 #define IS_PTR(uptr) (!(IS_INT(uptr)))
-#define IS_SYM(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) < SEND_p))
-#define IS_CONS(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) >= CSTART_p))
+#define IS_SYM(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) < UPTR(SEND_p)))
+#define IS_CONS(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) >= UPTR(CSTART_p)))
 #define IS_NIL(uptr) EQ(uptr, NIL)
 #define IS_REG(uptr) (IS_PTR(uptr) && !IS_NIL(uptr) && (TO_PTR(uptr) < 0x100))
 
@@ -70,11 +70,17 @@ void unhash_sym(char *buf, uptr_t sym_p);
 extern char __heap_start;
 extern char __bss_end;
 
-uptr_t CSTART_p;
-uptr_t CEND_p;
-uptr_t SSTART_p;
-uptr_t SEND_p;
+uptr_t *CSTART_p;
+uptr_t *CEND_p;
+uint32_t *SSTART_p;
+uint32_t *SEND_p;
 uptr_t *ENV_p;
+
+#define TOTALMEM() ((intptr_t)CEND_p - (intptr_t)SSTART_p)
+#define FREEMEM() ((intptr_t)CSTART_p - (intptr_t)SEND_p)
+#define USEDMEM() (TOTALMEM() - FREEMEM())
+#define CONSMEM() ((intptr_t)CEND_p - (intptr_t)CSTART_p)
+#define SYMMEM() ((intptr_t)SEND_p - (intptr_t)SSTART_p)
 
 void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);

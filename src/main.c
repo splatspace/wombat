@@ -234,11 +234,7 @@ int main(int argc, char *argv[]) {
   uptr_t form;
   while(1) {
     printf_P(PSTR("Total mem:\t%dB\nFree mem:\t%dB\tUsed mem:\t%dB\nCons mem:\t%dB\tSymbol mem:\t%dB\n"),
-        (CEND_p - SSTART_p),
-        (CSTART_p - SEND_p),
-        (CEND_p - CSTART_p)+(SEND_p-SSTART_p),
-        (CEND_p - CSTART_p),
-        (SEND_p - SSTART_p));
+             TOTALMEM(), FREEMEM(), USEDMEM(), CONSMEM(), SYMMEM());
     printf_P(PSTR("> "));
     form = read_form(stdin);
     while(getc(stdin) != '\r');

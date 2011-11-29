@@ -2,47 +2,47 @@
 
 void init_mem() {
 
-  CSTART_p = CEND_p = UPTR(&__heap_start);
-  SSTART_p = SEND_p = UPTR(&__bss_end);
+  CSTART_p = CEND_p = (uptr_t *)(&__heap_start);
+  SSTART_p = SEND_p = (uint32_t *)(&__bss_end);
 
-  memset(CPTR(SSTART_p), 0, CEND_p - SSTART_p);
+  memset(SSTART_p, 0, TOTALMEM());
 }
 
 uptr_t build_cons(uptr_t car, uptr_t cdr) {
-  if (CSTART_p - SEND_p < sizeof(uptr_t)) __GC__();
+  if (FREEMEM() < sizeof(uptr_t)) __GC__();
 
-  if (IS_PTR(cdr) && cdr == CSTART_p) {
-    CSTART_p -= sizeof(uptr_t);
-    *UPTR_PTR(CSTART_p) = car;
-    *UPTR_PTR(CSTART_p + sizeof(uptr_t)) |= CADR_FLAG;
-    return CSTART_p;
+  if (IS_PTR(cdr) && cdr == UPTR(CSTART_p)) {
+    CSTART_p--;
+    *CSTART_p = car;
+    *(CSTART_p + 1) |= CADR_FLAG;
+    return UPTR(CSTART_p);
   } 
 
-  CSTART_p -= sizeof(Cons);
-  Cons *new_cons = (Cons*)CPTR(CSTART_p);
+  CSTART_p -= 2;
+  Cons *new_cons = (Cons*)CSTART_p;
   new_cons->car = car;
   new_cons->cdr = cdr;
   return UPTR(new_cons);
 }
 
-void __mk_sym(uint32_t s) {
-  SVAL(SEND_p) = s;
-  SEND_p += 4;
+inline void __mk_sym(uint32_t s) {
+  *SEND_p = s;
+  SEND_p++;
 }
 
 uptr_t build_symbol(char *name) {
-  SVAL(SEND_p) = hash_sym(name);
+  *SEND_p = hash_sym(name);
 
-  uptr_t finder = SSTART_p;
+  uint32_t *finder = SSTART_p;
 
-  while (SVAL(finder) != SVAL(SEND_p)) finder += 4;
+  while (*finder != *SEND_p) ++finder;
 
   if (finder == SEND_p)
-    SEND_p += 4;
+    SEND_p++;
   else
-    SVAL(SEND_p) = 0;
+    *SEND_p = 0;
   
-  return finder;
+  return UPTR(finder);
 }
 
 inline void __set_env(uptr_t *env) {
