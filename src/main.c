@@ -29,6 +29,7 @@ uptr_t _fn(uptr_t *env, uptr_t fn, uptr_t args) {
     body = CDR(body);
   }
 
+  __set_env(env);
   return rval;
 }
 

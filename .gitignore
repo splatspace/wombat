@@ -5,3 +5,5 @@ uberlisp
 *.hex
 *.dSYM
 crazy_int
+\#*#
+.#*

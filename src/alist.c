@@ -15,4 +15,5 @@ uptr_t get(uptr_t alist, uptr_t k) {
 
 void assoc(uptr_t *alist, uptr_t k, uptr_t v) {
   *alist = build_cons(k, build_cons(v, *alist));
+  __set_env(alist);
 }

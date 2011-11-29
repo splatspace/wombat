@@ -8,7 +8,7 @@ DEVICE     = atmega328p
 # DEVICE     = atmega128
 CLOCK      = 16000000UL
 # OBJECTS    = src/arduino_io.o src/alist.o src/main.o src/print_form.o src/read_form.o src/types.o
-OBJECTS    = src/arduino_io.o src/print_form.o src/read_form.o src/types.o src/alist.o src/symbols.o src/main.o
+OBJECTS    = src/gc.o src/arduino_io.o src/print_form.o src/read_form.o src/types.o src/alist.o src/symbols.o src/main.o
 
 UNOTTY = /dev/ttyACM0
 UNOBAUD = 115200

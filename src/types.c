@@ -8,8 +8,8 @@ void init_mem() {
   memset(CPTR(SSTART_p), 0, CEND_p - SSTART_p);
 }
 
-uptr_t build_cons(uptr_t *env, uptr_t car, uptr_t cdr) {
-  if (CSTART_p - SEND_P < sizeof(uptr_t)) __GC__(env);
+uptr_t build_cons(uptr_t car, uptr_t cdr) {
+  if (CSTART_p - SEND_p < sizeof(uptr_t)) __GC__();
 
   if (IS_PTR(cdr) && cdr == CSTART_p) {
     CSTART_p -= sizeof(uptr_t);
@@ -43,6 +43,10 @@ uptr_t build_symbol(char *name) {
     SVAL(SEND_p) = 0;
   
   return finder;
+}
+
+inline void __set_env(uptr_t *env) {
+  ENV_p = env;
 }
 
 uint32_t hash_sym(char *name) {

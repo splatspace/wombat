@@ -74,10 +74,12 @@ uptr_t CSTART_p;
 uptr_t CEND_p;
 uptr_t SSTART_p;
 uptr_t SEND_p;
+uptr_t *ENV_p;
 
 void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
-void __mk_sym(uint32_t s);
+inline void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
+inline void __set_env(uptr_t *env);
 
 #endif
