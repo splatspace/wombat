@@ -144,7 +144,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
       if (IS_NIL(args))
         return NIL;
       if (IS_NIL(CDR(args)))
-        return CAR(args);
+        return eval(env, CAR(args));
       if (eval(env, CAR(args)) >= eval(env, CADR(args)))
         return NIL;
 

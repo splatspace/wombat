@@ -9,21 +9,22 @@ static int serial_write(char c, FILE *stream)
   if (c == '\n')
     serial_write('\r', stream);
 
-  while ( !(UCSR0A & (1 << UDRE0)) )
-    ;
+  loop_until_bit_is_set(USCR0A, UDRE0);
+
   UDR0 = c;
   return 0;
 }
 
 static int serial_read(FILE *stream)
 {
-  while( !(UCSR0A & (1 << RXC0)) )
-    ;
+  loop_until_bit_is_set(USCR0A, RXC0);
+
   char c = UDR0;
   if (c == '\r') 
     serial_write('\n', stream);
   else
     serial_write(toupper(c), stream);
+
   return (int)c;
 }
 
@@ -36,12 +37,12 @@ void init_env() {
   stdout = &mystdout;
 
   uint16_t bittimer = (F_CPU / 57600 / 16) - 1;
-  /* Set the baud rate */
+
   UBRR0H = (uint8_t) (bittimer >> 8);
   UBRR0L = (uint8_t) bittimer;
-  /* set the framing to 8N1 */
-  UCSR0C = (3 << UCSZ00);
-  /* Engage! */
-  UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+
+  UCSR0C = _BV(UCSZ00);
+
+  UCSR0B = _BV(RXEN0) | _BV(TXEN0);
 }
 
