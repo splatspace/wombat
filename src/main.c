@@ -49,6 +49,7 @@ uptr_t let(uptr_t *env, uptr_t args) {
     body = CDR(body);
   }
 
+  __set_env(env);
   return rval;
 }
 
@@ -81,6 +82,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
     }
   }
  
+  __set_env(env);
   return rval;
 }
 
