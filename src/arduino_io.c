@@ -9,7 +9,7 @@ static int serial_write(char c, FILE *stream)
   if (c == '\n')
     serial_write('\r', stream);
 
-  loop_until_bit_is_set(USCR0A, UDRE0);
+  loop_until_bit_is_set(UCSR0A, UDRE0);
 
   UDR0 = c;
   return 0;
@@ -17,7 +17,7 @@ static int serial_write(char c, FILE *stream)
 
 static int serial_read(FILE *stream)
 {
-  loop_until_bit_is_set(USCR0A, RXC0);
+  loop_until_bit_is_set(UCSR0A, RXC0);
 
   char c = UDR0;
   if (c == '\r') 
@@ -41,8 +41,8 @@ void init_env() {
   UBRR0H = (uint8_t) (bittimer >> 8);
   UBRR0L = (uint8_t) bittimer;
 
-  UCSR0C = _BV(UCSZ00);
+  UCSR0C = (3<<UCSZ00);
 
-  UCSR0B = _BV(RXEN0) | _BV(TXEN0);
+  UCSR0B = (1<<RXEN0) | (1<<TXEN0);
 }
 
