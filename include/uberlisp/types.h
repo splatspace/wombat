@@ -74,7 +74,7 @@ uptr_t *CSTART_p;
 uptr_t *CEND_p;
 uint32_t *SSTART_p;
 uint32_t *SEND_p;
-uptr_t *ENV_p;
+uptr_t ENV_p;
 
 #define TOTALMEM() ((intptr_t)CEND_p - (intptr_t)SSTART_p)
 #define FREEMEM() ((intptr_t)CSTART_p - (intptr_t)SEND_p)
@@ -86,6 +86,6 @@ void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
 inline void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
-inline void __set_env(uptr_t *env);
+inline void __set_env();
 
 #endif

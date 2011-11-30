@@ -47,7 +47,7 @@ uptr_t build_symbol(char *name) {
   return UPTR(finder);
 }
 
-inline void __set_env(uptr_t *env) {
+inline void __set_env(uptr_t env) {
   ENV_p = env;
 }
 

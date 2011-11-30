@@ -50,6 +50,6 @@
 #define S__DDRB __SHASH6('_', 'D', 'D', 'R', 'B', 0)
 #define S__PORTB __SHASH6('_', 'P', 'O', 'R', 'T', 'B')
 
-void init_syms(uptr_t *env);
+void init_syms();
 
 #endif
