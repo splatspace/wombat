@@ -31,6 +31,8 @@ inline void __mk_sym(uint32_t s) {
 }
 
 uptr_t build_symbol(char *name) {
+  if (FREEMEM() < sizeof(uint32_t)) __GC__();
+
   *SEND_p = hash_sym(name);
 
   uint32_t *finder = SSTART_p;
