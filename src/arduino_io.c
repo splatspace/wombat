@@ -41,8 +41,8 @@ void init_env() {
   UBRR0H = (uint8_t) (bittimer >> 8);
   UBRR0L = (uint8_t) bittimer;
 
-  UCSR0C = _BV(UCSZ00);
+  UCSR0C = (3<<UCSZ00);
 
-  UCSR0B = _BV(RXEN0) | _BV(TXEN0);
+  UCSR0B = (1<<RXEN0) | (1<<TXEN0);
 }
 
