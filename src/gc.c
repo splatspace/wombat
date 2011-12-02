@@ -12,7 +12,8 @@ int __GC__() {
     uptr_t *iter_CSTART_p = CSTART_p;
     
     uptr_t *cadr;
-    for(cadr = UPTR_PTR(ENV_p); IS_CADR(*cadr); cadr++) 
+    *UPTR_PTR(ENV_p) |= GC_FLAG;
+    for(cadr = UPTR_PTR(ENV_p) + 1; IS_CADR(*cadr); cadr++) 
       *cadr |= GC_FLAG;
     *cadr |= GC_FLAG;
 
