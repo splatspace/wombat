@@ -9,4 +9,6 @@ uptr_t get(uptr_t k);
 /* Associates k with v, manipulating alist in place. */
 void assoc(uptr_t k, uptr_t v);
 
+void __set_binding(uptr_t k, uptr_t v);
+
 #endif

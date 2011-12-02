@@ -125,7 +125,7 @@ uptr_t exec_special(uptr_t form) {
 
   case S_DEF: {
     uptr_t binding = eval(CADR(args));
-    assoc(CAR(args), binding);
+    __set_binding(CAR(args), binding);
     return binding;
   }
 
@@ -228,14 +228,13 @@ int main(int argc, char *argv[]) {
 
   init_syms();
 
-  printf_P(PSTR("env: "));
-  print_form(ENV_p);
-  printf_P(PSTR("\n"));
-
   uptr_t form;
   while(1) {
     printf_P(PSTR("Total mem:\t%dB\nFree mem:\t%dB\tUsed mem:\t%dB\nCons mem:\t%dB\tSymbol mem:\t%dB\n"),
              TOTALMEM(), FREEMEM(), USEDMEM(), CONSMEM(), SYMMEM());
+    printf_P(PSTR("env: "));
+    print_form(ENV_p);
+    printf_P(PSTR("\n"));
     printf_P(PSTR("> "));
     form = read_form(stdin);
     while(getc(stdin) != '\r');
