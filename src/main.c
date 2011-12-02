@@ -69,9 +69,8 @@ uptr_t loop(uptr_t form) {
     if (IS_SYM(CAAR(body)) && SVAL(CAAR(body)) == S_RECUR) {
       uptr_t new_vals = eval_list(CDAR(body));
       bindings = CAR(form);
-      __set_env(env);
       while (new_vals && bindings) {
-        assoc(CAR(bindings), CAR(new_vals));
+        __set_binding(CAR(bindings), CAR(new_vals));
         bindings = CDDR(bindings);
         new_vals = CDR(new_vals);
       }
