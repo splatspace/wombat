@@ -1,4 +1,5 @@
 #include <uberlisp/gc.h>
+#include <uberlisp/print_form.h>
 
 void __GC__() {
   printf_P(PSTR("\n** BEGIN GC **\n"));
@@ -19,7 +20,7 @@ void __GC__() {
     printf_P(PSTR("Counting orphans..."));
     for (cur = CSTART_p; cur < CEND_p; cur++)
       if (IS_ORPHAN(*cur)) orphans++;
-    printf_P(PSTR("done. %d orphans\n"), orphans);
+    printf_P(PSTR("done. %i orphans\n"), orphans);
 
     if (orphans) {
       cur = CSTART_p;
@@ -48,9 +49,9 @@ void __GC__() {
             }
           printf_P(PSTR("Done adjusting.\n"));
 
-          if (ENV_p < UPTR(cur)) *UPTR_PTR(ENV_p) += osize;
+          if (ENV_p < UPTR(cur)) ENV_p += osize * sizeof(uptr_t);
           cur = lend;
-          CSTART_p += csize;
+          CSTART_p += osize;
         } else
           cur++;
       }
@@ -65,4 +66,10 @@ void __GC__() {
   memset((void*)SEND_p, 0, FREEMEM());
   printf_P(PSTR("done.\n"));
   printf_P(PSTR("** GC COMPLETE **\n\n"));
+  printf_P(PSTR("Cons mem: { "));
+  for (cur = CSTART_p; cur < CEND_p; cur++) { printf_P(PSTR("%p: "), cur); print_form(*cur); printf_P(PSTR(", ")); }
+  printf_P(PSTR("}\n"));
+  printf_P(PSTR("env: "));
+  print_form(ENV_p);
+  printf_P(PSTR("\n"));
 }

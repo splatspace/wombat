@@ -86,6 +86,6 @@ void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
 inline void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
-inline void __set_env();
+inline void __set_env(uptr_t env);
 
 #endif
