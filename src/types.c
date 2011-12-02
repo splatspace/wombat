@@ -9,7 +9,11 @@ void init_mem() {
 }
 
 uptr_t build_cons(uptr_t car, uptr_t cdr) {
-  if (FREEMEM() < sizeof(uptr_t)) __GC__();
+  if (FREEMEM() < sizeof(uptr_t)) {
+    int offset = __GC__();
+    if (IS_CONS(car) && car < UPTR(CSTART_p)) car += offset;
+    if (IS_CONS(cdr) && cdr < UPTR(CSTART_p)) cdr += offset;
+  }
 
   if (IS_PTR(cdr) && cdr == UPTR(CSTART_p)) {
     CSTART_p--;

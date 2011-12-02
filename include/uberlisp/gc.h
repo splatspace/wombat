@@ -6,8 +6,6 @@
 
 #include <uberlisp/types.h>
 
-#define IS_ORPHAN(uptr) (IS_PTR(uptr) && !(*cur & (GC_FLAG | CADR_FLAG)))
-
-void __GC__();
+int __GC__();
 
 #endif
