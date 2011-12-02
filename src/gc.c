@@ -40,12 +40,11 @@ int __GC__() {
         uptr_t *lend = cur+1;
         while (IS_GARBAGE(*lend) && lend < CEND_p) lend++;
 
-        int gb_size = lend - cur;
-        CSTART_p = (uptr_t *)memmove( CSTART_p + gb_size,
+        gb_total_bytes += (intptr_t)lend - (intptr_t)cur;
+        CSTART_p = (uptr_t *)memmove( CSTART_p + (lend - cur),
                                       CSTART_p,
                                       (intptr_t)cur - (intptr_t)CSTART_p );
-        gb_total_bytes += gb_size * sizeof(uptr_t);
-        cur = lend;
+        cur = lend+1;
       } else
         cur++;
     }
