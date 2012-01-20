@@ -24,8 +24,8 @@ void assoc(uptr_t k, uptr_t v) {
 void __set_binding(uptr_t k, uptr_t v) {
   uptr_t alist = ENV_p;
   while (alist && !EQ(CAR(alist), k)) alist = CDDR(alist);
-  if (alist) {
+  if (alist)
     *UPTR_PTR(CDR(alist)) = v | CADR_FLAG;
-  } else
+  else
     assoc(k, v);
 }

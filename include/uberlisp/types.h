@@ -87,5 +87,6 @@ uptr_t build_cons(uptr_t car, uptr_t cdr);
 inline void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
 inline void __set_env(uptr_t env);
+uptr_t *get_cons_ptr(uptr_t cons);
 
 #endif
