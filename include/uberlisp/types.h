@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 typedef volatile intptr_t uptr_t;
+typedef uint8_t uoff_t;
 
 #include <avr/pgmspace.h>
 #include <uberlisp/symbols.h>
@@ -78,6 +79,7 @@ uptr_t SEND_p;
 
 uptr_t CRECENT_p;
 uptr_t ENV_p;
+uoff_t UPTR_CNT;
 
 #define TOTALMEM() (CEND_p - SSTART_p)
 #define FREEMEM() (CSTART_p - SEND_p)
@@ -90,5 +92,8 @@ uptr_t build_cons(uptr_t car, uptr_t cdr);
 inline void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
 inline uptr_t __set_env(uptr_t env);
+
+inline uoff_t __cache_uptr(uptr_t uptr);
+inline uptr_t __fetch_uptr(uoff_t offset);
 
 #endif

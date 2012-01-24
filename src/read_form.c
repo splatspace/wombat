@@ -75,10 +75,12 @@ uptr_t _read_list(FILE* f) {
     return read_form(f);
   } else {
     ungetc(c, f);
-    uptr_t car = read_form(f);
-    uptr_t cdr = _read_list(f);
+    uoff_t car_off = __cache_uptr(read_form(f));
+    uoff_t cdr_off = __cache_uptr(_read_list(f));
     
-    return build_cons(car, cdr);
+    uptr_t rest = build_cons(__fetch_uptr(car_off), __fetch_uptr(cdr_off));
+    UPTR_CNT -= 2;
+    return rest;
   }
 }
 

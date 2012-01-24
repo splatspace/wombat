@@ -235,7 +235,10 @@ int main(int argc, char *argv[]) {
     print_form(ENV_p);
     printf_P(PSTR("\n"));
     printf_P(PSTR("> "));
+    
     form = read_form(stdin);
+    CRECENT_p = NIL;
+    
     while(getc(stdin) != '\r');
     print_form(eval(form));
     printf_P(PSTR("\n"));

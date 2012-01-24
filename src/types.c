@@ -103,3 +103,13 @@ void unhash_sym(char *buf, uptr_t sym_p) {
     }
   }
 }
+
+uoff_t __cache_uptr(uptr_t uptr) {
+  UPTR_CNT++;
+  *UPTR_PTR(CEND_p + UPTR_CNT*2) = uptr;
+  return UPTR_CNT;
+}
+
+uptr_t __fetch_uptr(uoff_t offset) {
+  return *UPTR_PTR(CEND_p + offset*2);
+}
