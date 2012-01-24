@@ -1,8 +1,7 @@
 #include <uberlisp/types.h>
 
 void init_mem() {
-
-  CSTART_p = CEND_p = UPTR(&__heap_start);
+  CSTART_p = CEND_p = UPTR(&__heap_start) - PTR_CACHE_SIZE;
   SSTART_p = SEND_p = UPTR(&__bss_end);
 
   memset(CPTR(SSTART_p), 0, TOTALMEM());
@@ -19,13 +18,15 @@ uptr_t build_cons(uptr_t car, uptr_t cdr) {
     CSTART_p -= sizeof(uptr_t);
     *UPTR_PTR(CSTART_p) = car;
     *UPTR_PTR(CSTART_p + sizeof(uptr_t)) |= CADR_FLAG;
+    CRECENT_p = CSTART_p;
     return CSTART_p;
   } 
 
   CSTART_p -= sizeof(Cons);
-  Cons *new_cons = (Cons*)CPTR(CSTART_p);
+  Cons *new_cons = CONS_PTR(CSTART_p);
   new_cons->car = car;
   new_cons->cdr = cdr;
+  CRECENT_p = CSTART_p;
   return UPTR(new_cons);
 }
 

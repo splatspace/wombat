@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <stdint.h>
 
-typedef intptr_t uptr_t;
+typedef volatile intptr_t uptr_t;
 
 #include <avr/pgmspace.h>
 #include <uberlisp/symbols.h>
@@ -69,11 +69,14 @@ void unhash_sym(char *buf, uptr_t sym_p);
 
 extern char __heap_start;
 extern char __bss_end;
+#define PTR_CACHE_SIZE 128
 
 uptr_t CSTART_p;
 uptr_t CEND_p;
 uptr_t SSTART_p;
 uptr_t SEND_p;
+
+uptr_t CRECENT_p;
 
 #define TOTALMEM() (CEND_p - SSTART_p)
 #define FREEMEM() (CSTART_p - SEND_p)
