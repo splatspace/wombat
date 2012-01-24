@@ -10,14 +10,16 @@ typedef intptr_t uptr_t;
 
 #include <avr/pgmspace.h>
 #include <uberlisp/symbols.h>
+#include <uberlisp/gc.h>
 
 #define UPTR(cptr) ((uptr_t)(cptr))
-#define CPTR(uptr) ((void *)(uptr))
+#define CPTR(uptr) ((void *)TO_PTR(uptr))
 
 #define LIT_SYM_FLAG (((uint32_t)1)<<31)
 
 #define CADR_FLAG (((uptr_t)1)<<15)
 #define INT_FLAG (((uptr_t)1)<<14)
+#define GC_FLAG (((uptr_t)1)<<13)
 
 #define IS_CADR(uptr) ((uptr) & CADR_FLAG)
 #define VAL(uptr) ((uptr) & ~CADR_FLAG)
@@ -29,8 +31,8 @@ typedef intptr_t uptr_t;
 #define IS_NIL(uptr) EQ(uptr, NIL)
 #define IS_REG(uptr) (IS_PTR(uptr) && !IS_NIL(uptr) && (TO_PTR(uptr) < 0x100))
 
-#define TO_PTR(uptr) ((uptr) & 0x3FFF)
-#define TO_INT(uptr) (((int16_t)((uptr)<<2))>>2)
+#define TO_PTR(uptr) ((uptr) & 0x1FFF)
+#define TO_INT(uptr) (((int16_t)((uptr)<<3))>>3)
 
 #define INTERN_INT(val) (TO_PTR(val) | INT_FLAG)
 
@@ -73,9 +75,15 @@ uptr_t CEND_p;
 uptr_t SSTART_p;
 uptr_t SEND_p;
 
+#define TOTALMEM() (CEND_p - SSTART_p)
+#define FREEMEM() (CSTART_p - SEND_p)
+#define USEDMEM() (TOTALMEM() - FREEMEM())
+#define CONSMEM() (CEND_p - CSTART_p)
+#define SYMMEM() (SEND_p - SSTART_p)
+
 void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
-void __mk_sym(uint32_t s);
+inline void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
 
 #endif

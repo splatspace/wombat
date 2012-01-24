@@ -5,10 +5,16 @@ void init_mem() {
   CSTART_p = CEND_p = UPTR(&__heap_start);
   SSTART_p = SEND_p = UPTR(&__bss_end);
 
-  memset(CPTR(SSTART_p), 0, CEND_p - SSTART_p);
+  memset(CPTR(SSTART_p), 0, TOTALMEM());
 }
 
 uptr_t build_cons(uptr_t car, uptr_t cdr) {
+  if (FREEMEM() < sizeof(uptr_t)) {
+    int offset = __GC__();
+    if (IS_CONS(car) && car < CSTART_p) car += offset;
+    if (IS_CONS(cdr) && cdr < CSTART_p) cdr += offset;
+  }
+
   if (IS_PTR(cdr) && cdr == CSTART_p) {
     CSTART_p -= sizeof(uptr_t);
     *UPTR_PTR(CSTART_p) = car;
@@ -29,6 +35,8 @@ void __mk_sym(uint32_t s) {
 }
 
 uptr_t build_symbol(char *name) {
+  if (FREEMEM() < sizeof(uint32_t)) __GC__();
+
   SVAL(SEND_p) = hash_sym(name);
 
   uptr_t finder = SSTART_p;
