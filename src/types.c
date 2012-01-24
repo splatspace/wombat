@@ -35,6 +35,10 @@ void __mk_sym(uint32_t s) {
   SEND_p += 4;
 }
 
+void __set_env(uptr_t env) {
+  ENV_p = env;
+}
+
 uptr_t build_symbol(char *name) {
   if (FREEMEM() < sizeof(uint32_t)) __GC__();
 

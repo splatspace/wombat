@@ -4,9 +4,11 @@
 #include <uberlisp/types.h>
 
 /* Returns value at k or NIL if not found. */
-uptr_t get(uptr_t alist, uptr_t k);
+uptr_t get(uptr_t k);
 
 /* Associates k with v, manipulating alist in place. */
-void assoc(uptr_t *alist, uptr_t k, uptr_t v);
+void assoc(uptr_t k, uptr_t v);
+
+void __set_binding(uptr_t k, uptr_t v);
 
 #endif
