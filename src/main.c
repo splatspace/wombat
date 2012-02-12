@@ -57,34 +57,38 @@ uptr_t let(uptr_t *env, uptr_t args) {
 }
 
 uptr_t loop(uptr_t *env, uptr_t form) {
-  uptr_t bindings = CAR(form);
-  uptr_t body = CDR(form);
-  uptr_t local_env = *env;
+  uptr_t *bindings_p = refer(CAR(form)),
+    *body_p = refer(CDR(form)),
+    *form_p = refer(form),
+    *local_env = refer(*env);
 
-  while (bindings) {
-    assoc(&local_env, CAR(bindings), eval(&local_env, CADR(bindings)));
-    bindings = CDDR(bindings);
+  while (*bindings_p) {
+    assoc(local_env, CAR(*bindings_p), eval(local_env, CADR(*bindings_p)));
+    *bindings_p = CDDR(*bindings_p);
   }
 
-  uptr_t rval = NIL;
-  while (body) {
-    if (IS_SYM(CAAR(body)) && SVAL(CAAR(body)) == S_RECUR) {
-      uptr_t new_env = *env;
-      uptr_t new_vals = CDAR(body);
-      bindings = CAR(form);
-      while (new_vals && bindings) {
-        assoc(&new_env, CAR(bindings), eval(&local_env, CAR(new_vals)));
-        bindings = CDDR(bindings);
-        new_vals = CDR(new_vals);
+  uptr_t rval = NIL,
+    *new_env = refer(NIL),
+    *new_vals = refer(NIL);
+  while (*body_p) {
+    if (IS_SYM(CAAR(*body_p)) && SVAL(CAAR(*body_p)) == S_RECUR) {
+      *new_env = env;
+      *new_vals = CDAR(*body_p);
+      *bindings_p = CAR(*form_p);
+      while (*new_vals && *bindings_p) {
+        assoc(new_env, CAR(*bindings_p), eval(local_env, CAR(*new_vals)));
+        *bindings_p = CDDR(*bindings_p);
+        *new_vals = CDR(*new_vals);
       }
-      body = CDR(form);
-      local_env = new_env;
+      *body_p = CDR(*form_p);
+      *local_env = *new_env;
     } else {
-      rval = eval(&local_env, CAR(body));
-      body = CDR(body);
+      rval = eval(local_env, CAR(*body_p));
+      *body_p = CDR(*body_p);
     }
   }
  
+  release(6) // bindings_p, body_p, form_p, local_env, new_env, new_vals
   return rval;
 }
 
