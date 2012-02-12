@@ -51,7 +51,7 @@ uptr_t let(uptr_t *env, uptr_t args) {
     *body_p = CDR(*body_p);
   }
 
-  release(3) // bindings_p, body_p, local_env
+  release(3); // bindings_p, body_p, local_env
 
   return rval;
 }
@@ -88,7 +88,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
     }
   }
  
-  release(6) // bindings_p, body_p, form_p, local_env, new_env, new_vals
+  release(6); // bindings_p, body_p, form_p, local_env, new_env, new_vals
   return rval;
 }
 
@@ -115,14 +115,24 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_CDR:
     return CDR(eval(env, CAR(args)));
 
-  case S_IF:
-    if (eval(env, CADR(form)))
-      return CDDR(form) ? eval(env, CADDR(form)) : NIL;
-    else
-      return CDDDR(form) ? eval(env, CAR(CDDDR(form))) : NIL;
+  case S_IF: {
+    uptr_t rval = NIL, *clauses = refer(args);
+
+    if (eval(env, CAR(*clauses)) && CDR(*clauses))
+      rval = eval(env, CADR(*clauses));
+    else if (CDDR(*clauses))
+      rval = eval(env, CADDR(*clauses));
+
+    release(1); // clauses
+    return rval;
+  }
     
-  case S_CONS:
-    return build_cons(eval(env, CAR(args)), eval(env, CADR(args)));
+  case S_CONS: {
+    uptr_t rval = NIL, *args_p = refer(args);
+    rval = build_cons(eval(env, CAR(*args_p)), eval(env, CADR(*args_p)));
+    release(1); // args_p
+    return rval;
+  }
 
   case S_PRINT:
     print_form(eval(env, CAR(args)));
@@ -130,9 +140,11 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return NIL;
 
   case S_DEF: {
-    uptr_t binding = eval(env, CADR(args));
-    assoc(env, CAR(args), binding);
-    return binding;
+    uptr_t *args_p = refer(args),
+      *binding = refer(eval(env, CADR(args)));
+    assoc(env, CAR(*args_p), *binding);
+    release(2); // args_p, binding
+    return *binding; // Yeah, it's been "released", but the pointer is still valid.
   }
 
   case S_EVAL:
@@ -140,45 +152,52 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 
   case S_PLUS: {
     int sum = 0;
-    uptr_t rem_args = args;
-    while (rem_args) {
-      sum += eval(env, CAR(rem_args));
-      rem_args = CDR(rem_args);
+    uptr_t *rem_args = refer(args);
+    while (*rem_args) {
+      sum += eval(env, CAR(*rem_args));
+      *rem_args = CDR(*rem_args);
     }
+    release(1); // rem_args
     return INTERN_INT(sum);
   }
 
-  case S_LT:
-    while(1) {
-      if (IS_NIL(args))
-        return NIL;
-      if (IS_NIL(CDR(args)))
-        return eval(env, CAR(args));
-      if (eval(env, CAR(args)) >= eval(env, CADR(args)))
-        return NIL;
-
-      args = CDR(args);
-    }
+  case S_LT: {
+    if IS_NIL(args) return NIL;
+    
+    uptr_t *args_p = refer(args);
+    while(!IS_NIL(CDR(*args_p)) && (eval(env, CAR(*args_p)) < eval(env, CADR(*args_p))))
+      *args_p = CDR(*args_p);
+    
+    uptr_t rval = NIL;
+    if (IS_NIL(CDR(*args_p)))
+      rval = eval(env, CAR(*args_p));
+    release(1); // args_p
+    return rval;
+  }
       
   case S_MINUS: {
-    int diff = eval(env, CAR(args));
-    uptr_t rem_args = CDR(args);
-    while (rem_args) {
-      diff -= eval(env, CAR(rem_args));
-      rem_args = CDR(rem_args);
+    uptr_t *rem_args = refer(args);
+    int diff = eval(env, CAR(*rem_args));
+    *rem_args = CDR(*rem_args);
+    while (*rem_args) {
+      diff -= eval(env, CAR(*rem_args));
+      *rem_args = CDR(*rem_args);
     }
+    release(1); // rem_args
     return INTERN_INT(diff);
   }
 
   case S_SREG: {
-    uptr_t reg = eval(env, CAR(args));
+    uptr_t *args_p = refer(args),
+      reg = eval(env, CAR(*args_p));
     if (IS_REG(reg))
-      *BYTE_PTR(reg) = eval(env, CADR(args));
+      *BYTE_PTR(reg) = eval(env, CADR(*args_p));
     else {
       printf_P(PSTR("Invalid register: "));
       print_form(reg);
       printf_P(PSTR("\n"));
     }
+    release(1); // args_p
     return NIL;
   }
 
@@ -200,7 +219,7 @@ uptr_t eval_list(uptr_t *env, uptr_t list) {
   
   uptr_t *list_p = refer(list), rval;
   rval = build_cons(eval(env, CAR(*list_p)), eval_list(env, CDR(*list_p)));
-  release(1);
+  release(1); // list_p
   return rval;
 }
 
@@ -229,7 +248,7 @@ uptr_t eval(uptr_t *env, uptr_t form) {
 
   }
   
-  release(1);
+  release(1); // form_p
   return rval;
 }
 
