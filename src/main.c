@@ -13,40 +13,45 @@
 uptr_t eval(uptr_t *env, uptr_t form);
 
 uptr_t _fn(uptr_t *env, uptr_t fn, uptr_t args) {
-  uptr_t lvars = CADR(fn);
-  uptr_t body = CDDR(fn);
-  uptr_t local_env = *env;
+  uptr_t *lvars_p = refer(CADR(fn)),
+    *body_p = refer(CDDR(fn)),
+    *args_p = refer(args),
+    *local_env = refer(*env);
 
-  while (lvars && args) {
-    assoc(&local_env, CAR(lvars), CAR(args));
-    lvars = CDR(lvars);
-    args = CDR(args);
+  while (*lvars_p && *args_p) {
+    assoc(local_env, CAR(*lvars_p), CAR(*args_p));
+    *lvars_p = CDR(*lvars_p);
+    *args_p = CDR(*args_p);
   }
 
   uptr_t rval = NIL;
-  while(body) {
-    rval = eval(&local_env, CAR(body));
-    body = CDR(body);
+
+  while(*body_p) {
+    rval = eval(local_env, CAR(*body_p));
+    *body_p = CDR(*body_p);
   }
 
+  release(4); // lvars_p, body_p, args_p, local_env
   return rval;
 }
 
 uptr_t let(uptr_t *env, uptr_t args) {
-  uptr_t bindings = CAR(args);
-  uptr_t body = CDR(args);
-  uptr_t local_env = *env;
+  uptr_t *bindings_p = refer(CAR(args)),
+    *body_p = refer(CDR(args)),
+    *local_env = refer(*env);
 
-  while (bindings) {
-    assoc(&local_env, CAR(bindings), eval(&local_env, CADR(bindings)));
-    bindings = CDDR(bindings);
+  while (*bindings_p) {
+    assoc(local_env, CAR(*bindings_p), eval(local_env, CADR(*bindings_p)));
+    *bindings_p = CDDR(*bindings_p);
   }
 
   uptr_t rval = NIL;
-  while(body) {
-    rval = eval(&local_env, CAR(body));
-    body = CDR(body);
+  while(*body_p) {
+    rval = eval(local_env, CAR(*body_p));
+    *body_p = CDR(*body_p);
   }
+
+  release(3) // bindings_p, body_p, local_env
 
   return rval;
 }
@@ -188,8 +193,11 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 uptr_t eval_list(uptr_t *env, uptr_t list) {
   if (IS_NIL(list))
     return NIL;
-
-  return build_cons(eval(env, CAR(list)), eval_list(env, CDR(list)));
+  
+  uptr_t *list_p = refer(list), rval;
+  rval = build_cons(eval(env, CAR(*list_p)), eval_list(env, CDR(*list_p)));
+  release(1);
+  return rval;
 }
 
 uptr_t eval(uptr_t *env, uptr_t form) {
