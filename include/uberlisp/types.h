@@ -9,6 +9,7 @@
 typedef volatile intptr_t uptr_t;
 
 #include <avr/pgmspace.h>
+#include <uberlisp/gc.h>
 #include <uberlisp/symbols.h>
 
 #define UPTR(cptr) ((uptr_t)(cptr))
@@ -18,6 +19,7 @@ typedef volatile intptr_t uptr_t;
 
 #define CADR_FLAG (((uptr_t)1)<<15)
 #define INT_FLAG (((uptr_t)1)<<14)
+#define GC_FLAG (((uptr_t)1)<<13)
 
 #define IS_CADR(uptr) ((uptr) & CADR_FLAG)
 #define VAL(uptr) ((uptr) & ~CADR_FLAG)
@@ -29,8 +31,8 @@ typedef volatile intptr_t uptr_t;
 #define IS_NIL(uptr) EQ(uptr, NIL)
 #define IS_REG(uptr) (IS_PTR(uptr) && !IS_NIL(uptr) && (TO_PTR(uptr) < 0x100))
 
-#define TO_PTR(uptr) ((uptr) & 0x3FFF)
-#define TO_INT(uptr) (((int16_t)((uptr)<<2))>>2)
+#define TO_PTR(uptr) ((uptr) & 0x1FFF)
+#define TO_INT(uptr) (((int16_t)((uptr)<<3))>>3)
 
 #define INTERN_INT(val) (TO_PTR(val) | INT_FLAG)
 

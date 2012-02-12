@@ -7,6 +7,7 @@
 #include <uberlisp/alist.h>
 #include <uberlisp/read_form.h>
 #include <uberlisp/print_form.h>
+#include <uberlisp/gc.h>
 
 #include <stdio.h>
 
@@ -72,7 +73,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
     *new_vals = refer(NIL);
   while (*body_p) {
     if (IS_SYM(CAAR(*body_p)) && SVAL(CAAR(*body_p)) == S_RECUR) {
-      *new_env = env;
+      *new_env = *env;
       *new_vals = CDAR(*body_p);
       *bindings_p = CAR(*form_p);
       while (*new_vals && *bindings_p) {
@@ -241,15 +242,16 @@ uptr_t eval(uptr_t *env, uptr_t form) {
       rval = _fn(env, fn, eval_list(env, CDR(*form_p)));
     } else {
       printf_P(PSTR("ERROR: "));
-      print_form(CAR(*form));
+      print_form(CAR(*form_p));
       printf_P(PSTR(" cannot be in function position.\n"));
       rval = NIL;
     }
 
+    release(1); // form_p
+    return rval;
   }
   
-  release(1); // form_p
-  return rval;
+  return NIL;
 }
 
 int main() {
@@ -273,6 +275,7 @@ int main() {
     while(getc(stdin) != '\r');
     print_form(eval(env, *form_p));
     printf_P(PSTR("\n"));
+    //__GC__();
   }
 
   release(2); // Just a formality really...
