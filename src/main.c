@@ -252,7 +252,7 @@ uptr_t eval(uptr_t *env, uptr_t form) {
   return rval;
 }
 
-int main(int argc, char *argv[]) {
+int main() {
 
   init_env(); // Poorly named. Has nothing to do with env alist.
   init_mem();
