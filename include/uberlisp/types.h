@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 typedef volatile intptr_t uptr_t;
 typedef uint8_t uoff_t;
@@ -95,5 +96,16 @@ inline uptr_t __set_env(uptr_t env);
 
 inline uoff_t __cache_uptr(uptr_t uptr);
 inline uptr_t __fetch_uptr(uoff_t offset);
+inline void __free(int count);
+
+#define DECL(uoff)                              \
+  #define P_##uoff __fetch_uptr(uoff)
+
+#define DEF(uoff, uptr)                         \
+  uoff_t uoff = __cache_uptr(uptr);             \
+  DECL(uoff);
+
+#define UDECL(uoff)                             \
+  #undef P_##uoff
 
 #endif

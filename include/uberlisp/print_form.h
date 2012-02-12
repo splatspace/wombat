@@ -8,7 +8,7 @@
 #include <uberlisp/types.h>
 
 /* Prints form, a Lisp data structure, to stdout. */
-void print_form(uptr_t x);
+void print_form(uoff_t x);
 /*void dbg_pf(void *form);*/
 
 #endif

@@ -10,84 +10,120 @@
 
 #include <stdio.h>
 
-uptr_t eval(uptr_t form);
-uptr_t eval_list(uptr_t list);
+uptr_t eval(uoff_t form);
+uptr_t eval_list(uoff_t list);
 
-uptr_t _fn(uptr_t fn, uptr_t args) {
-  uptr_t lvars = CADR(fn);
-  uptr_t body = CDDR(fn);
-  uptr_t env = ENV_p;
+uptr_t _fn(uoff_t fn, uoff_t args) {
+  DECL(fn);
+  DECL(args);
+  DEF(lvars, CADR(P_fn));
+  DEF(body, CDDR(P_fn));
+  DEF(env, ENV_p);
 
-  while (lvars && args) {
-    assoc(CAR(lvars), CAR(args));
-    lvars = CDR(lvars);
-    args = CDR(args);
+  while (P_lvars && P_args) {
+    assoc(CAR(P_lvars), CAR(P_args));
+    P_lvars = CDR(P_lvars);
+    P_args = CDR(P_args);
   }
 
-  uptr_t rval = NIL;
-  while(body) {
-    rval = eval(CAR(body));
-    body = CDR(body);
+  DEF(fnval, NIL);
+
+  while(P_body) {
+    P_fnval = eval(CAR(P_body));
+    P_body = CDR(P_body);
   }
 
-  __set_env(env);
+  __set_env(P_env);
+
+  uptr_t rval = P_fnval;
+
+  UDECL(fn);
+  UDECL(args);
+  UDECL(lvars);
+  UDECL(body);
+  UDECL(env);
+  UDECL(fnval);
+  __free(4); /* lvars, body, env, fnval */
+
   return rval;
 }
 
-uptr_t let(uptr_t args) {
-  uptr_t bindings = CAR(args);
-  uptr_t body = CDR(args);
-  uptr_t env = ENV_p;
+uptr_t let(uoff_t args) {
+  DECL(args);
+  DEF(bindings, CAR(args));
+  DEF(body, CDR(args));
+  DEF(env, ENV_p);
 
-  while (bindings) {
-    assoc(CAR(bindings), eval(CADR(bindings)));
-    bindings = CDDR(bindings);
+  while (P_bindings) {
+    assoc(CAR(P_bindings), eval(CADR(P_bindings)));
+    P_bindings = CDDR(P_bindings);
   }
 
-  uptr_t rval = NIL;
-  while(body) {
-    rval = eval(CAR(body));
-    body = CDR(body);
+  DEF(letval, NIL);
+  while(P_body) {
+    P_letval = eval(CAR(P_body));
+    P_body = CDR(P_body);
   }
 
-  __set_env(env);
+  __set_env(P_env);
+
+  uptr_t rval = P_letval;
+
+  UDECL(args);
+  UDECL(bindings);
+  UDECL(body);
+  UDECL(env);
+  UDECL(letval);
+  __free();
+
   return rval;
 }
 
-uptr_t loop(uptr_t form) {
-  uptr_t bindings = CAR(form);
-  uptr_t body = CDR(form);
-  uptr_t env = ENV_p;
+uptr_t loop(uoff_t form) {
+  DECL(form);
+  DEF(bindings, CAR(form));
+  DEF(body, CDR(form));
+  DEF(env, ENV_p);
 
-  while (bindings) {
-    assoc(CAR(bindings), eval(CADR(bindings)));
-    bindings = CDDR(bindings);
+  while (P_bindings) {
+    assoc(CAR(P_bindings), eval(CADR(P_bindings)));
+    P_bindings = CDDR(P_bindings);
   }
 
-  uptr_t rval = NIL;
-  while (body) {
-    if (IS_SYM(CAAR(body)) && SVAL(CAAR(body)) == S_RECUR) {
-      uptr_t new_vals = eval_list(CDAR(body));
-      bindings = CAR(form);
-      while (new_vals && bindings) {
-        __set_binding(CAR(bindings), CAR(new_vals));
-        bindings = CDDR(bindings);
-        new_vals = CDR(new_vals);
+  DEF(loopval, NIL);
+  while (P_body) {
+    if (IS_SYM(CAAR(P_body)) && SVAL(CAAR(P_body)) == S_RECUR) {
+      DEF(new_vals, eval_list(CDAR(body)));
+      P_bindings = CAR(P_form);
+      while (P_new_vals && P_bindings) {
+        __set_binding(CAR(P_bindings), CAR(P_new_vals));
+        P_bindings = CDDR(P_bindings);
+        P_new_vals = CDR(P_new_vals);
       }
-      body = CDR(form);
+      P_body = CDR(P_form);
     } else {
-      rval = eval(CAR(body));
-      body = CDR(body);
+      P_loopval = eval(CAR(P_body));
+      P_body = CDR(P_body);
     }
   }
  
-  __set_env(env);
+  __set_env(P_env);
+
+  uptr_t rval = P_loopval;
+  UDECL(form);
+  UDECL(bindings);
+  UDECL(body);
+  UDECL(env);
+  UDECL(loopval);
+  __free(5);
+  
   return rval;
 }
 
-uptr_t exec_special(uptr_t form) {
-  uptr_t fn = CAR(form);
-  uptr_t args = CDR(form);
+uptr_t exec_special(uoff_t form) {
+  DECL(form);
+  DEF(fn, CAR(P_form));
+  DEF(args, CDR(P_form));
 
   switch(SVAL(fn)) {
   case S_LET:
@@ -109,10 +145,11 @@ uptr_t exec_special(uptr_t form) {
     return CDR(eval(CAR(args)));
 
   case S_IF:
-    if (eval(CADR(form)))
-      return CDDR(form) ? eval(CADDR(form)) : NIL;
+    DECL(form);
+    if (eval(CADR(P_form)))
+      return CDDR(P_form) ? eval(CADDR(P_form)) : NIL;
     else
-      return CDDDR(form) ? eval(CAR(CDDDR(form))) : NIL;
+      return CDDDR(P_form) ? eval(CAR(CDDDR(P_form))) : NIL;
     
   case S_CONS:
     return build_cons(eval(CAR(args)), eval(CADR(args)));

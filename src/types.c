@@ -4,6 +4,8 @@ void init_mem() {
   CSTART_p = CEND_p = UPTR(&__heap_start) - PTR_CACHE_SIZE;
   SSTART_p = SEND_p = UPTR(&__bss_end);
 
+  UPTR_CNT = 0;
+
   memset(CPTR(SSTART_p), 0, TOTALMEM());
 }
 
@@ -102,6 +104,11 @@ void unhash_sym(char *buf, uptr_t sym_p) {
       ++cur;
     }
   }
+}
+
+void __free(int count) {
+  memset(__fetch_uptr(UPTR_CNT), 0, 2*count);
+  UPTR_CNT -= count;
 }
 
 uoff_t __cache_uptr(uptr_t uptr) {
