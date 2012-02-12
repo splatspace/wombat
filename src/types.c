@@ -1,14 +1,22 @@
 #include <uberlisp/types.h>
 
 void init_mem() {
-
-  CSTART_p = CEND_p = UPTR(&__heap_start);
+  CSTART_p = CEND_p = UPTR(&__heap_start) - PTR_CACHE_SIZE;
+  PTREND_p = (uptr_t *)CEND_p;
   SSTART_p = SEND_p = UPTR(&__bss_end);
 
-  memset(CPTR(SSTART_p), 0, CEND_p - SSTART_p);
+  memset(CPTR(SSTART_p), 0, CEND_p - SSTART_p + PTR_CACHE_SIZE);
 }
 
 uptr_t build_cons(uptr_t car, uptr_t cdr) {
+  if (FREEMEM() < sizeof(Cons)) {
+    uptr_t *car_p = refer(car), *cdr_p = refer(cdr);
+    __GC__();
+    car = *car_p;
+    cdr = *cdr_p;
+    release(2);
+  }
+
   if (IS_PTR(cdr) && cdr == CSTART_p) {
     CSTART_p -= sizeof(uptr_t);
     *UPTR_PTR(CSTART_p) = car;
@@ -29,6 +37,8 @@ void __mk_sym(uint32_t s) {
 }
 
 uptr_t build_symbol(char *name) {
+  if (FREEMEM() < sizeof(uint32_t)) __GC__();
+
   SVAL(SEND_p) = hash_sym(name);
 
   uptr_t finder = SSTART_p;
@@ -89,4 +99,13 @@ void unhash_sym(char *buf, uptr_t sym_p) {
       ++cur;
     }
   }
+}
+
+uptr_t *refer(uptr_t uptr) {
+  *PTREND_p = uptr;
+  return PTREND_p++; // Whaddaya gonna do 'bout it, eh?
+}
+
+void release(int ptr_count) {
+  PTREND_p -= ptr_count;
 }

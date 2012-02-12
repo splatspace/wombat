@@ -101,7 +101,7 @@ uptr_t read_form(FILE* f) {
   } else if(c == '(') {
     return _read_list(f);
   } else if(c == '\'') {
-    return build_cons(build_symbol("quote"), build_cons(read_form(f), NIL));
+    return build_cons(build_symbol("QUOTE"), build_cons(read_form(f), NIL));
   }
   return read_form(f);
 }

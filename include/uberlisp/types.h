@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <stdint.h>
 
-typedef intptr_t uptr_t;
+typedef volatile intptr_t uptr_t;
 
 #include <avr/pgmspace.h>
 #include <uberlisp/symbols.h>
@@ -68,14 +68,26 @@ void unhash_sym(char *buf, uptr_t sym_p);
 extern char __heap_start;
 extern char __bss_end;
 
+#define PTR_CACHE_SIZE 128
+
 uptr_t CSTART_p;
 uptr_t CEND_p;
 uptr_t SSTART_p;
 uptr_t SEND_p;
+uptr_t *PTREND_p;
+
+#define TOTALMEM() (CEND_p    - SSTART_p)
+#define FREEMEM()  (CSTART_p  - SEND_p)
+#define CONSMEM()  (CEND_p    - CSTART_p)
+#define SYMMEM()   (SEND_p    - SSTART_p)
+#define USEDMEM()  (CONSMEM() + SYMMEM())
 
 void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
-void __mk_sym(uint32_t s);
+inline void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
+
+inline uptr_t *refer(uptr_t uptr);
+inline void release(int ptr_count);
 
 #endif

@@ -200,22 +200,25 @@ uptr_t eval(uptr_t *env, uptr_t form) {
     return get(*env, form);
 
   if (IS_CONS(form)) {
-    uptr_t fn = eval(env, CAR(form));
-    if (IS_SYM(fn))
-      return exec_special(env, form);
+    uptr_t *form_p = refer(form), 
+      fn = eval(env, CAR(*form_p)), 
+      rval;
 
-    if(IS_CONS(fn) && SVAL(CAR(fn)) == S_FN) {
-      return _fn(env, fn, eval_list(env, CDR(form)));
+    if (IS_SYM(fn)) {
+      rval = exec_special(env, *form_p);
+    } else if (IS_CONS(fn) && SVAL(CAR(fn)) == S_FN) {
+      rval = _fn(env, fn, eval_list(env, CDR(*form_p)));
+    } else {
+      printf_P(PSTR("ERROR: "));
+      print_form(CAR(*form));
+      printf_P(PSTR(" cannot be in function position.\n"));
+      rval = NIL;
     }
 
-    printf_P(PSTR("ERROR: "));
-    print_form(CAR(form));
-    printf_P(PSTR(" cannot be in function position.\n"));
-    return NIL;
-
   }
-
-  return NIL;
+  
+  release(1);
+  return rval;
 }
 
 int main(int argc, char *argv[]) {
@@ -223,27 +226,25 @@ int main(int argc, char *argv[]) {
   init_env(); // Poorly named. Has nothing to do with env alist.
   init_mem();
 
-  uptr_t env = NIL;
-  init_syms(&env);
+  uptr_t *env = refer(NIL);
+  init_syms(env);
 
   printf_P(PSTR("env: "));
-  print_form(env);
+  print_form(*env);
   printf_P(PSTR("\n"));
 
-  uptr_t form;
+  uptr_t *form_p = refer(NIL);
   while(1) {
     printf_P(PSTR("Total mem:\t%dB\nFree mem:\t%dB\tUsed mem:\t%dB\nCons mem:\t%dB\tSymbol mem:\t%dB\n"),
-        (CEND_p - SSTART_p),
-        (CSTART_p - SEND_p),
-        (CEND_p - CSTART_p)+(SEND_p-SSTART_p),
-        (CEND_p - CSTART_p),
-        (SEND_p - SSTART_p));
+             TOTALMEM(), FREEMEM(), USEDMEM(), CONSMEM(), SYMMEM());
     printf_P(PSTR("> "));
-    form = read_form(stdin);
+    *form_p = read_form(stdin);
     while(getc(stdin) != '\r');
-    print_form(eval(&env, form));
+    print_form(eval(env, *form_p));
     printf_P(PSTR("\n"));
   }
+
+  release(2); // Just a formality really...
 
   return 0;
 }
