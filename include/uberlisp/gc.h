@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <avr/pgmspace.h>
 #include <uberlisp/types.h>
+#include <uberlisp/debug.h>
 
 void __GC__();
 

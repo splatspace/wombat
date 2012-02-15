@@ -8,6 +8,7 @@
 #include <uberlisp/read_form.h>
 #include <uberlisp/print_form.h>
 #include <uberlisp/gc.h>
+#include <uberlisp/debug.h>
 
 #include <stdio.h>
 
@@ -262,20 +263,19 @@ int main() {
   uptr_t *env = refer(NIL);
   init_syms(env);
 
-  printf_P(PSTR("env: "));
-  print_form(*env);
-  printf_P(PSTR("\n"));
-
   uptr_t *form_p = refer(NIL);
   while(1) {
-    printf_P(PSTR("Total mem:\t%dB\nFree mem:\t%dB\tUsed mem:\t%dB\nCons mem:\t%dB\tSymbol mem:\t%dB\n"),
-             TOTALMEM(), FREEMEM(), USEDMEM(), CONSMEM(), SYMMEM());
+    print_env(*env);
+    print_mem();
+
     printf_P(PSTR("> "));
     *form_p = read_form(stdin);
     while(getc(stdin) != '\r');
     print_form(eval(env, *form_p));
     printf_P(PSTR("\n"));
-    //__GC__();
+
+    print_mem();
+    __GC__();
   }
 
   release(2); // Just a formality really...

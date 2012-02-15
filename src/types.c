@@ -104,7 +104,7 @@ void unhash_sym(char *buf, uptr_t sym_p) {
 uptr_t *refer(uptr_t uptr) {
   *PTREND_p = uptr;
   PTREND_p++;
-  printf_P(PSTR("SP: %p\tPTREND_p %p\n"), SP, PTREND_p);
+  //  printf_P(PSTR("SP: %p\tPTREND_p %p\n"), SP, PTREND_p);
   return PTREND_p - 1;
 }
 
