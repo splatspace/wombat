@@ -61,6 +61,4 @@ void __GC__() {
   } while (garbage);
   printf_P(PSTR("GC Complete!\n"));
   print_mem();
-  print_form(*UPTR_PTR(CEND_p + 2));
-  printf_P(PSTR("\n"));
 }

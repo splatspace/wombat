@@ -7,6 +7,6 @@
 #include <uberlisp/print_form.h>
 
 void print_mem();
-void print_env(uptr_t env);
+void print_env(uptr_t *env);
 
 #endif
