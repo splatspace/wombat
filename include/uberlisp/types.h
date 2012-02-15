@@ -26,8 +26,8 @@ typedef volatile intptr_t uptr_t;
 
 #define IS_INT(uptr) ((uptr) & INT_FLAG)
 #define IS_PTR(uptr) (!(IS_INT(uptr)))
-#define IS_SYM(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) < SEND_p))
-#define IS_CONS(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) >= CSTART_p))
+#define IS_SYM(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) < SEND_p) && (TO_PTR(uptr) >= SSTART_p))
+#define IS_CONS(uptr) (IS_PTR(uptr) && (TO_PTR(uptr) >= CSTART_p) && (TO_PTR(uptr) < CEND_p))
 #define IS_NIL(uptr) EQ(uptr, NIL)
 #define IS_REG(uptr) (IS_PTR(uptr) && !IS_NIL(uptr) && (TO_PTR(uptr) < 0x100))
 
