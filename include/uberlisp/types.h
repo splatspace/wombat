@@ -13,7 +13,7 @@ typedef volatile intptr_t uptr_t;
 #include <uberlisp/symbols.h>
 
 #define UPTR(cptr) ((uptr_t)(cptr))
-#define CPTR(uptr) ((void *)(uptr))
+#define CPTR(uptr) ((void *)TO_PTR((uptr)))
 
 #define LIT_SYM_FLAG (((uint32_t)1)<<31)
 
@@ -22,7 +22,7 @@ typedef volatile intptr_t uptr_t;
 #define GC_FLAG (((uptr_t)1)<<13)
 
 #define IS_CADR(uptr) ((uptr) & CADR_FLAG)
-#define VAL(uptr) ((uptr) & ~CADR_FLAG)
+#define VAL(uptr) ((uptr) & ~(CADR_FLAG | GC_FLAG))
 
 #define IS_INT(uptr) ((uptr) & INT_FLAG)
 #define IS_PTR(uptr) (!(IS_INT(uptr)))

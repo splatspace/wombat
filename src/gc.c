@@ -11,9 +11,10 @@ void __GC__() {
     printf_P(PSTR("Marking..."));
     while (cur < PTREND_p) {
       if (IS_CONS(*cur)) {
-        Cons *cons = CONS_PTR(*cur);
-        cons->car |= GC_FLAG;
-        if (! IS_CADR(cons->cdr)) cons->cdr |= GC_FLAG;
+        uptr_t *cons = UPTR_PTR(*cur);
+        *cons |= GC_FLAG;
+        while (IS_CADR(*(++cons)));
+        *cons |= GC_FLAG;
       }
       cur++;
     }
@@ -23,14 +24,13 @@ void __GC__() {
     cur = UPTR_PTR(CSTART_p);
     printf_P(PSTR("Sweeping...\n"));
     while (cur < UPTR_PTR(CEND_p)) {
-      if (! ((*cur & (GC_FLAG | CADR_FLAG)) || IS_NIL(*cur))) {
+      if (! (*cur & (GC_FLAG | CADR_FLAG))) {
         garbage = 1;
         free_st = cur;
 
         while (! (*cur & GC_FLAG) && cur < UPTR_PTR(CEND_p)) cur++;
 
         if (IS_CADR(*cur)) *cur &= ~CADR_FLAG;
-        else while (IS_NIL(*cur) && cur < UPTR_PTR(CEND_p)) cur++;
 
         free_end = cur;
 
@@ -45,7 +45,11 @@ void __GC__() {
         CSTART_p += free_bytes;
 
         for (cur = UPTR_PTR(CSTART_p); cur < PTREND_p; ++cur)
-          if (IS_CONS(*cur) && TO_PTR(*cur) < UPTR(free_end)) *cur += free_bytes;
+          if (IS_CONS(*cur) && TO_PTR(*cur) < UPTR(free_end)) {
+            printf_P(PSTR("Adjusting pointer (%p)\told: 0x%x (0x%x)\t"), cur, TO_PTR(*cur), *cur);
+            *cur += free_bytes;
+            printf_P(PSTR("new: 0x%x (0x%x)\n"), TO_PTR(*cur), *cur);
+          }
         cur = free_end;
 
       } else
