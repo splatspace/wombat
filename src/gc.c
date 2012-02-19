@@ -30,7 +30,7 @@ void __GC__() {
 
         while (! (*cur & GC_FLAG) && cur < UPTR_PTR(CEND_p)) cur++;
 
-        if (IS_CADR(*cur)) *cur &= ~CADR_FLAG;
+        *cur &= ~CADR_FLAG; // If CADR, it isn't anymore. No need to check; just adds insxns.
 
         free_end = cur;
 
@@ -42,14 +42,17 @@ void __GC__() {
                  
         memmove(CPTR(CSTART_p + free_bytes), CPTR(CSTART_p), kept_bytes);
         memset(CPTR(CSTART_p), 0, free_bytes);
-        CSTART_p += free_bytes;
 
-        for (cur = UPTR_PTR(CSTART_p); cur < PTREND_p; ++cur)
+        for (cur = UPTR_PTR(CSTART_p + free_bytes); cur < PTREND_p; ++cur)
           if (IS_CONS(*cur) && TO_PTR(*cur) < UPTR(free_end)) {
+            // We should assert that none of the pointers we're
+            // shifting are pointing to the freed memory location
+            // (btwn free_st & free_end)
             printf_P(PSTR("Adjusting pointer (%p)\told: 0x%x (0x%x)\t"), cur, TO_PTR(*cur), *cur);
             *cur += free_bytes;
             printf_P(PSTR("new: 0x%x (0x%x)\n"), TO_PTR(*cur), *cur);
           }
+        CSTART_p += free_bytes; // IS_CONS() depends on CSTART_p, can't move until after we fix ptrs
         cur = free_end;
 
       } else
