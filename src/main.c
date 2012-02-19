@@ -68,7 +68,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
     assoc(local_env, CAR(*bindings_p), eval(local_env, CADR(*bindings_p)));
     *bindings_p = CDDR(*bindings_p);
   }
-  print_env(local_env);
+  //  print_env(local_env);
 
   uptr_t rval = NIL,
     *new_env = refer(NIL),
@@ -85,7 +85,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
       }
       *body_p = CDR(*form_p);
       *local_env = *new_env;
-      print_env(local_env);
+      //      print_env(local_env);
     } else {
       rval = eval(local_env, CAR(*body_p));
       *body_p = CDR(*body_p);
@@ -276,7 +276,7 @@ int main() {
     print_form(eval(env, *form_p));
     printf_P(PSTR("\n"));
 
-    print_mem();
+    //    print_mem();
     __GC__();
   }
 
