@@ -1,0 +1,14 @@
+* interrupt support
+** we need to be able to handle interrupts
+** should be able to wire lisp functions as interrupts callbacks
+** keyboard interrupt?
+* REPL
+** maybe we want computer-side "shim" that we can inferior-lisp from Emacs
+*** use readline
+* Better error handling/reporting
+* jump/break/nonlocal return?
+** do we want exceptions?
+* do we want lexical scope?
+** need to maintain a scope chain, pass environments around with functions
+** maybe 
+* Clojure-style macros
