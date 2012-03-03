@@ -1,14 +1,64 @@
-* interrupt support
-** we need to be able to handle interrupts
-** should be able to wire lisp functions as interrupts callbacks
-** keyboard interrupt?
-* REPL
-** maybe we want computer-side "shim" that we can inferior-lisp from Emacs
+* *Things We Need*
+** TODO interrupt support
+*** should be able to attach a function to an interrupt
+*** more useful if functions are closures?
+*** keyboard interrupts?
+** TODO computer-side REPL shim
 *** use readline
-* Better error handling/reporting
-* jump/break/nonlocal return?
-** do we want exceptions?
-* do we want lexical scope?
-** need to maintain a scope chain, pass environments around with functions
-** maybe 
-* Clojure-style macros
+*** to hand character buffering
+*** could potentially fix flakiness of Uno serial
+*** would allow Emacs inferior-lisp
+*** could host documentation system?
+**** if in computer-side REPL, wouldn't need to be on-device
+*** may also be able to point at source file to "load" the entire file
+** TODO better error handling/reporting
+** TODO deep recur
+*** right now, recur doesn't work if deep in loop form
+** TODO macro system
+*** syntax-quote (`), unquote (~), unquote-splicing (~@)
+** TODO special operators
+*** do
+*** fexpr?
+**** we could write the macro system with this
+** TODO builtin macros (when macro system ready)
+*** control-flow
+**** when
+**** dolist
+*** logic
+**** and
+**** or
+*** numerics/bit ops
+**** bit-shift-* and friends
+** TODO documentation and distribution
+*** build instructions for mac, linux
+*** deploy instructions for popular arduinos
+*** example code (see Arduino examples)
+*** Emacs, other editor inferior-lisp instructions (Sublime, vim?)
+* *Things We Might Need*
+** package/namespace support
+*** it's common in Arduino-land to distribute libraries; would make this easier
+*** do we want namespaces, and how would they be implemented?
+*** too much overhead?
+** jump/break/non-local returns
+*** see also exceptions and unwind-protect
+** exceptions
+*** see also: [[http://www.lispworks.com/documentation/lw51/CLHS/Body/s_unwind.htm][unwind-protect in CL]]
+** atoms
+*** for use with interrupts and callbacks
+*** prevent clobbering of intermediate values
+*** can we leverage a machine instruction for this?
+** lexical scope
+*** capturing callbacks for wiring to interrupts - useful?
+*** possibly too expensive in space
+** stack-friendly eval
+*** deeply-nested code may blow stack when eval'd; audit eval
+** better GC
+*** [[http://home.pipeline.com/~hbaker1/RealTimeGC.html][List Processing in Real Time on a Serial Computer]] by Henry Baker
+*** [[http://dspace.mit.edu/handle/1721.1/5751][AIM 444 "LISP Machine Progress Report"]]
+** compiler
+*** computer-hosted
+*** would allow us to compile library functions and macros
+*** slimmer onboard runtime
+** hash table/dictionary
+*** literal support?
+*** too much overhead?
