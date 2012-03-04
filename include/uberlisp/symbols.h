@@ -40,6 +40,7 @@
 #define S_SREG  __SHASH4('S', 'R', 'E', 'G')
 #define S_SLP   __SHASH4('S', 'L', 'P',  0)
 #define S_LOOP  __SHASH4('L', 'O', 'O', 'P')
+#define S_WHEN  __SHASH4('W', 'H', 'E', 'N')
 
 #define _Z_ ('A' - 1) // hashes to 0
 #define _U_ ('A' + USCORE_HSH - 1) // hashes to 27

@@ -133,6 +133,19 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     release(1); // clauses
     return rval;
   }
+
+  case S_WHEN: {
+    uptr_t rval = NIL, *cond_p = refer(CAR(args)), *body_p = refer(CDR(args));
+
+    if (eval(env, *cond_p))
+      while(*body_p) {
+        rval = eval(env, CAR(*body_p));
+        *body_p = CDR(*body_p);
+      }
+
+    release(2); // cond_p, body_p
+    return rval;
+  }
     
   case S_CONS: {
     uptr_t rval = NIL, *args_p = refer(args);
