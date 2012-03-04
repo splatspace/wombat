@@ -11,6 +11,8 @@
 *** could host documentation system?
 **** if in computer-side REPL, wouldn't need to be on-device
 *** may also be able to point at source file to "load" the entire file
+*** Could do form validation and issue warnings
+*** Could have extra functionality like (doc ...)
 ** TODO better error handling/reporting
 ** DONE deep recur
 *** right now, recur doesn't work if deep in loop form
@@ -29,6 +31,12 @@
 **** or
 *** numerics/bit ops
 **** bit-shift-* and friends
+** TODO Stop binding function-position valid symbols to themselves in the environment
+*** This is an unnecessary waste of CONSMEM
+*** We have a finite set of pre-defined symbols with functionality, so we can deal with them in C
+**** We shouldn't have to get a binding for a symbol we already know about to dispatch its execution
+**** Perhaps we should look for one anyway though, in case it has been redefined.
+**** If one isn't found, we drop to compiled-in functionality
 ** TODO documentation and distribution
 *** build instructions for mac, linux
 *** deploy instructions for popular arduinos
