@@ -12,7 +12,7 @@
 **** if in computer-side REPL, wouldn't need to be on-device
 *** may also be able to point at source file to "load" the entire file
 ** TODO better error handling/reporting
-** TODO deep recur
+** DONE deep recur
 *** right now, recur doesn't work if deep in loop form
 ** TODO macro system
 *** syntax-quote (`), unquote (~), unquote-splicing (~@)
