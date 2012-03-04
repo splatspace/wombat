@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 uptr_t eval(uptr_t *env, uptr_t form);
+uptr_t eval_list(uptr_t *env, uptr_t list);
 
 uptr_t _fn(uptr_t *env, uptr_t fn, uptr_t args) {
   uptr_t *lvars_p = refer(CADR(fn)),
@@ -74,9 +75,12 @@ uptr_t loop(uptr_t *env, uptr_t form) {
     *new_env = refer(NIL),
     *new_vals = refer(NIL);
   while (*body_p) {
-    if (IS_SYM(CAAR(*body_p)) && SVAL(CAAR(*body_p)) == S_RECUR) {
+    rval = eval(local_env, CAR(*body_p));
+    *body_p = CDR(*body_p);
+
+    if (IS_CONS(rval) && SVAL(CAR(rval)) == S_RECUR) {
       *new_env = *env;
-      *new_vals = CDAR(*body_p);
+      *new_vals = CDR(rval);
       *bindings_p = CAR(*form_p);
       while (*new_vals && *bindings_p) {
         assoc(new_env, CAR(*bindings_p), eval(local_env, CAR(*new_vals)));
@@ -85,10 +89,6 @@ uptr_t loop(uptr_t *env, uptr_t form) {
       }
       *body_p = CDR(*form_p);
       *local_env = *new_env;
-      //      print_env(local_env);
-    } else {
-      rval = eval(local_env, CAR(*body_p));
-      *body_p = CDR(*body_p);
     }
   }
  
@@ -109,6 +109,9 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 
   case S_LOOP:
     return loop(env, args);
+
+  case S_RECUR:
+    return build_cons(fn, eval_list(env, args));
 
   case S_QUOTE:
     return CAR(args);

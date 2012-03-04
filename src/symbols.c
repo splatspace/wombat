@@ -49,6 +49,9 @@ void init_syms(uptr_t *env) {
   __mk_sym(S_LOOP);
   assoc(env, (SEND_p-4), (SEND_p-4));
 
+  __mk_sym(S_RECUR);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
   // Registers
   __mk_sym(S__DDRB);
   assoc(env, (SEND_p-4), (0x04 + __SFR_OFFSET));
