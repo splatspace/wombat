@@ -78,7 +78,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
     rval = eval(local_env, CAR(*body_p));
     *body_p = CDR(*body_p);
 
-    if (IS_CONS(rval) && SVAL(CAR(rval)) == S_RECUR) {
+    if (IS_CONS(rval) && IS_SYM(CAR(rval)) && SVAL(CAR(rval)) == S_RECUR) {
       *new_env = *env;
       *new_vals = CDR(rval);
       *bindings_p = CAR(*form_p);
@@ -110,8 +110,12 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_LOOP:
     return loop(env, args);
 
-  case S_RECUR:
-    return build_cons(fn, eval_list(env, args));
+  case S_RECUR: {
+    uptr_t rval, *fn_p = refer(fn);
+    rval = build_cons(*fn_p, eval_list(env, args));
+    release(1); // fn_p
+    return rval;
+  }
 
   case S_QUOTE:
     return CAR(args);
@@ -252,21 +256,22 @@ uptr_t eval(uptr_t *env, uptr_t form) {
 
   if (IS_CONS(form)) {
     uptr_t *form_p = refer(form), 
-      fn = eval(env, CAR(*form_p)), 
+      *fn_p = refer(eval(env, CAR(*form_p))), 
       rval;
 
-    if (IS_SYM(fn)) {
+    if (IS_SYM(*fn_p)) {
       rval = exec_special(env, *form_p);
-    } else if (IS_CONS(fn) && SVAL(CAR(fn)) == S_FN) {
-      rval = _fn(env, fn, eval_list(env, CDR(*form_p)));
+    } else if (IS_CONS(*fn_p) && SVAL(CAR(*fn_p)) == S_FN) {
+      rval = _fn(env, *fn_p, eval_list(env, CDR(*form_p)));
     } else {
       printf_P(PSTR("ERROR: "));
       print_form(CAR(*form_p));
       printf_P(PSTR(" cannot be in function position.\n"));
+
       rval = NIL;
     }
 
-    release(1); // form_p
+    release(2); // form_p, fn_p
     return rval;
   }
   
