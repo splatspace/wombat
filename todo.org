@@ -1,4 +1,15 @@
 * *Things We Need*
+** DONE deep recur
+*** Recur is working when nested in additional forms
+*** DONE BUT if a loop is nested in another loop, the inner loop doesn't recur properly.
+**** This was a stack overflow bug! Lame. We need to address excessive stack usage
+
+** TODO Less PTRMEM used.
+*** We could use the top 4 bits of the pointers as counters, reusing each pointer up to 15 times
+*** This means O(n) refer()
+*** Also makes dereferencing hairier
+**** Perhaps we could write a simple pre-preprocessor script?
+**** Convert @ptr into *(ptr & 0x0FFF) ?
 ** TODO interrupt support
 *** should be able to attach a function to an interrupt
 *** more useful if functions are closures?
@@ -14,19 +25,6 @@
 *** Could do form validation and issue warnings
 *** Could have extra functionality like (doc ...)
 ** TODO better error handling/reporting
-** INPROGRESS deep recur
-*** Recur is working when nested in additional forms
-*** BUT if a loop is nested in another loop, the inner loop doesn't recur properly. For instance:
-
-> (LOOP (X 0) (WHEN (< X 3) (LOOP (X 0) (WHEN (< X 3) (PRINT X) (RECUR (+ X 1)))) (PRINT X) (RECUR (+ X 1))))
-0
-0
-0
-1
-0
-2
-()
-
 ** TODO macro system
 *** syntax-quote (`), unquote (~), unquote-splicing (~@)
 ** TODO special operators
