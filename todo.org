@@ -14,8 +14,19 @@
 *** Could do form validation and issue warnings
 *** Could have extra functionality like (doc ...)
 ** TODO better error handling/reporting
-** DONE deep recur
-*** right now, recur doesn't work if deep in loop form
+** INPROGRESS deep recur
+*** Recur is working when nested in additional forms
+*** BUT if a loop is nested in another loop, the inner loop doesn't recur properly. For instance:
+
+> (LOOP (X 0) (WHEN (< X 3) (LOOP (X 0) (WHEN (< X 3) (PRINT X) (RECUR (+ X 1)))) (PRINT X) (RECUR (+ X 1))))
+0
+0
+0
+1
+0
+2
+()
+
 ** TODO macro system
 *** syntax-quote (`), unquote (~), unquote-splicing (~@)
 ** TODO special operators
