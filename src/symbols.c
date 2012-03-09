@@ -1,132 +1,103 @@
 #include <uberlisp/symbols.h>
 
 void init_syms(uptr_t *env) {
-  __mk_sym(S_LET);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_LET (SSTART_p + 0x0)
+  SVAL(PS_LET) = S_LET;
+  assoc(env, PS_LET, PS_LET);
 
-  __mk_sym(S_FN);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_FN (SSTART_p + 0x4)
+  SVAL(PS_FN) = S_FN;
+  assoc(env, PS_FN, PS_FN);
 
-  __mk_sym(S_DO);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_DO (SSTART_p + 0x8)
+  SVAL(PS_DO) = S_DO;
+  assoc(env, PS_DO, PS_DO);
 
-  __mk_sym(S_QUOTE);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_QUOTE (SSTART_p + 0xC)
+  SVAL(PS_QUOTE) = S_QUOTE;
+  assoc(env, PS_QUOTE, PS_QUOTE);
 
-  __mk_sym(S_CAR);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_CAR (SSTART_p + 0x10)
+  SVAL(PS_CAR) = S_CAR;
+  assoc(env, PS_CAR, PS_CAR);
 
-  __mk_sym(S_CDR);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_CDR (SSTART_p + 0x14)
+  SVAL(PS_CDR) = S_CDR;
+  assoc(env, PS_CDR, PS_CDR);
 
-  __mk_sym(S_CONS);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_CONS (SSTART_p + 0x18)
+  SVAL(PS_CONS) = S_CONS;
+  assoc(env, PS_CONS, PS_CONS);
 
-  __mk_sym(S_PRINT);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_PRINT (SSTART_p + 0x1C)
+  SVAL(PS_PRINT) = S_PRINT;
+  assoc(env, PS_PRINT, PS_PRINT);
 
-  __mk_sym(S_DEF);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_DEF (SSTART_p + 0x20)
+  SVAL(PS_DEF) = S_DEF;
+  assoc(env, PS_DEF, PS_DEF);
 
-  __mk_sym(S_IF);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_IF (SSTART_p + 0x24)
+  SVAL(PS_IF) = S_IF;
+  assoc(env, PS_IF, PS_IF);
 
-  __mk_sym(S_AND);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_AND (SSTART_p + 0x28)
+  SVAL(PS_AND) = S_AND;
+  assoc(env, PS_AND, PS_AND);
 
-  __mk_sym(S_OR);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_OR (SSTART_p + 0x2C)
+  SVAL(PS_OR) = S_OR;
+  assoc(env, PS_OR, PS_OR);
 
-  __mk_sym(S_NOT);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_NOT (SSTART_p + 0x30)
+  SVAL(PS_NOT) = S_NOT;
+  assoc(env, PS_NOT, PS_NOT);
 
-  __mk_sym(S_TRUE);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_TRUE (SSTART_p + 0x34)
+  SVAL(PS_TRUE) = S_TRUE;
+  assoc(env, PS_TRUE, PS_TRUE);
 
-  __mk_sym(S_EVAL);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_EVAL (SSTART_p + 0x38)
+  SVAL(PS_EVAL) = S_EVAL;
+  assoc(env, PS_EVAL, PS_EVAL);
 
-  __mk_sym(S_PLUS);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_PLUS (SSTART_p + 0x3C)
+  SVAL(PS_PLUS) = S_PLUS;
+  assoc(env, PS_PLUS, PS_PLUS);
 
-  __mk_sym(S_MINUS);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_MINUS (SSTART_p + 0x40)
+  SVAL(PS_MINUS) = S_MINUS;
+  assoc(env, PS_MINUS, PS_MINUS);
 
-  __mk_sym(S_MULT);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_MULT (SSTART_p + 0x44)
+  SVAL(PS_MULT) = S_MULT;
+  assoc(env, PS_MULT, PS_MULT);
 
-  __mk_sym(S_DIV);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_DIV (SSTART_p + 0x48)
+  SVAL(PS_DIV) = S_DIV;
+  assoc(env, PS_DIV, PS_DIV);
 
-  __mk_sym(S_EQL);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_EQL (SSTART_p + 0x4C)
+  SVAL(PS_EQL) = S_EQL;
+  assoc(env, PS_EQL, PS_EQL);
 
-  __mk_sym(S_NEQL);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_NEQL (SSTART_p + 0x50)
+  SVAL(PS_NEQL) = S_NEQL;
+  assoc(env, PS_NEQL, PS_NEQL);
 
-  __mk_sym(S_LT);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_LT (SSTART_p + 0x54)
+  SVAL(PS_LT) = S_LT;
+  assoc(env, PS_LT, PS_LT);
 
-  __mk_sym(S_LTE);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_LTE (SSTART_p + 0x58)
+  SVAL(PS_LTE) = S_LTE;
+  assoc(env, PS_LTE, PS_LTE);
 
-  __mk_sym(S_GT);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_GT (SSTART_p + 0x5C)
+  SVAL(PS_GT) = S_GT;
+  assoc(env, PS_GT, PS_GT);
 
-  __mk_sym(S_GTE);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_GTE (SSTART_p + 0x60)
+  SVAL(PS_GTE) = S_GTE;
+  assoc(env, PS_GTE, PS_GTE);
 
-  __mk_sym(S_SREG);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_SREG (SSTART_p + 0x64)
+  SVAL(PS_SREG) = S_SREG;
+  assoc(env, PS_SREG, PS_SREG);
 
-  __mk_sym(S_SLP);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_SLP (SSTART_p + 0x68)
+  SVAL(PS_SLP) = S_SLP;
+  assoc(env, PS_SLP, PS_SLP);
 
-  __mk_sym(S_LOOP);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_LOOP (SSTART_p + 0x6C)
+  SVAL(PS_LOOP) = S_LOOP;
+  assoc(env, PS_LOOP, PS_LOOP);
 
-  __mk_sym(S_RECUR);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_RECUR (SSTART_p + 0x70)
+  SVAL(PS_RECUR) = S_RECUR;
+  assoc(env, PS_RECUR, PS_RECUR);
 
-  __mk_sym(S_WHEN);
-  assoc(env, (SEND_p-4), (SEND_p-4));
-#define PS_WHEN (SSTART_p + 0x74)
+  SVAL(PS_WHEN) = S_WHEN;
+  assoc(env, PS_WHEN, PS_WHEN);
+
+  // Must be updated when symbols are added
+  SEND_p = PS_WHEN + 4;
 
   // Registers
   __mk_sym(S__DDRB);
   assoc(env, (SEND_p-4), (0x04 + __SFR_OFFSET));
-#define PS__DDRB (SSTART_p + 0x78)
 
   __mk_sym(S__PORTB);
   assoc(env, (SEND_p-4), (0x05 + __SFR_OFFSET));
-#define PS__PORTB (SSTART_p + 0x7C)
 }
