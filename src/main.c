@@ -138,7 +138,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return CDR(eval(env, CAR(args)));
 
   case S_AND: {
-    if (IS_NIL(args)) return TRUE_p;
+    if (IS_NIL(args)) return PS_TRUE;
     uptr_t *rem_args = refer(args),
       rval = NIL;
     while ((rval = eval(env, CAR(*rem_args))) && (*rem_args = CDR(*rem_args)));
@@ -158,7 +158,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_NOT: {
     if (IS_NIL(args)) return NIL;
     uptr_t rval = eval(env, CAR(args));
-    return rval ? NIL : TRUE_p;
+    return rval ? NIL : PS_TRUE;
   }
     
   case S_IF: {
@@ -213,7 +213,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
       if (IS_NIL(args)) return NIL;                                     \
                                                                         \
       uptr_t *args_p = refer(args);                                     \
-      while(!IS_NIL(CDR(*args_p)) && (eval(env, CAR(*args_p)) _COMP_OPR eval(env, CADR(*args_p)))) \
+      while(CDR(*args_p) && (eval(env, CAR(*args_p)) _COMP_OPR eval(env, CADR(*args_p)))) \
         *args_p = CDR(*args_p);                                         \
                                                                         \
       uptr_t rval = NIL;                                                \

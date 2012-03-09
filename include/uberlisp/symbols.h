@@ -44,6 +44,7 @@
 #define S_MULT  __SHASH4('*',  0,   0,   0)
 #define S_DIV   __SHASH4('/',  0,   0,   0)
 #define S_EQL   __SHASH4('=',  0,   0,   0)
+#define S_NEQL  __SHASH4('N', 'O', 'T', '=')
 #define S_LT    __SHASH4('<',  0,   0,   0)
 #define S_LTE   __SHASH4('<',  '=', 0,   0)
 #define S_GT    __SHASH4('>',  0,   0,   0)
