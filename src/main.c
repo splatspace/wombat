@@ -223,13 +223,13 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 
 #define _COMP_OPR ==
   case S_EQL: {
-    uptr_t rval;
+    uptr_t rval = NIL;
     _COMPR(rval);
     return rval;
   }
 
   case S_NEQL: {
-    uptr_t rval;
+    uptr_t rval = NIL;
     _COMPR(rval);
     return rval ? NIL : PS_TRUE;
   }
@@ -237,7 +237,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 
 #define _COMP_OPR <
   case S_LT: {
-    uptr_t rval;
+    uptr_t rval = NIL;
     _COMPR(rval);
     return rval;
   }
@@ -245,7 +245,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
       
 #define _COMP_OPR <=
   case S_LTE: {
-    uptr_t rval;
+    uptr_t rval = NIL;
     _COMPR(rval);
     return rval;
   }
@@ -253,7 +253,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
       
 #define _COMP_OPR >
   case S_GT: {
-    uptr_t rval;
+    uptr_t rval = NIL;
     _COMPR(rval);
     return rval;
   }
@@ -261,7 +261,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
       
 #define _COMP_OPR >=
   case S_GTE: {
-    uptr_t rval;
+    uptr_t rval = NIL;
     _COMPR(rval);
     return rval;
   }
@@ -272,7 +272,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
       coll = TO_INT(eval(env, CAR(*rem_args)));                 \
       *rem_args = CDR(*rem_args);                               \
       while (*rem_args) {                                       \
-        coll _ARITH_OPR TO_INT(eval(env, CAR(*rem_args)));   \
+        coll _ARITH_OPR TO_INT(eval(env, CAR(*rem_args)));      \
         *rem_args = CDR(*rem_args);                             \
       }                                                         \
       release(1);                                               \
@@ -311,7 +311,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 #define _ARITH_OPR /=
   case S_DIV: {
     if (! args) return NIL;
-    if (! CDR(args)) return INTERN_INT(0);
+    if (! CDR(args)) return TO_INT(CAR(args)) == 1 ? 1 : 0;
     int rval;
     _ARITH(rval);
     return INTERN_INT(rval);
