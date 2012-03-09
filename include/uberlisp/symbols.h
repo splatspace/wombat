@@ -36,14 +36,20 @@
 #define S_EVAL  __SHASH4('E', 'V', 'A', 'L')
 #define S_PLUS  __SHASH4('+',  0,   0,   0)
 #define S_MINUS __SHASH4('-',  0,   0,   0)
+#define S_MULT  __SHASH4('*',  0,   0,   0)
+#define S_DIV   __SHASH4('/',  0,   0,   0)
+#define S_EQL   __SHASH4('=',  0,   0,   0)
 #define S_LT    __SHASH4('<',  0,   0,   0)
+#define S_LTE   __SHASH4('<',  '=', 0,   0)
+#define S_GT    __SHASH4('>',  0,   0,   0)
+#define S_GTE   __SHASH4('>',  '=', 0,   0)
 #define S_SREG  __SHASH4('S', 'R', 'E', 'G')
 #define S_SLP   __SHASH4('S', 'L', 'P',  0)
 #define S_LOOP  __SHASH4('L', 'O', 'O', 'P')
 #define S_WHEN  __SHASH4('W', 'H', 'E', 'N')
 
 #define _Z_ ('A' - 1) // hashes to 0
-#define _U_ ('A' + USCORE_HSH - 1) // hashes to 27
+#define _U_ ('A' + USCORE_HSH - 1) // hashes to USCORE_HSH
 
 #define S_PRINT __SHASH6('P', 'R', 'I', 'N', 'T', _Z_)
 #define S_QUOTE __SHASH6('Q', 'U', 'O', 'T', 'E', _Z_)

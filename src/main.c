@@ -174,42 +174,75 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_EVAL:
     return eval(env, eval(env, CAR(args)));
 
-  case S_PLUS: {
-    int sum = 0;
-    uptr_t *rem_args = refer(args);
-    while (*rem_args) {
-      sum += eval(env, CAR(*rem_args));
-      *rem_args = CDR(*rem_args);
-    }
-    release(1); // rem_args
-    return INTERN_INT(sum);
-  }
+#define _COMPR {                                                        \
+      if (IS_NIL(args)) return NIL;                                     \
+                                                                        \
+      uptr_t *args_p = refer(args);                                     \
+      while(!IS_NIL(CDR(*args_p)) && (eval(env, CAR(*args_p)) _COMP_OPR eval(env, CADR(*args_p)))) \
+        *args_p = CDR(*args_p);                                         \
+                                                                        \
+      uptr_t rval = NIL;                                                \
+      if (IS_NIL(CDR(*args_p)))                                         \
+        rval = eval(env, CAR(*args_p));                                 \
+      release(1);                                                       \
+      return rval; }
 
-  case S_LT: {
-    if IS_NIL(args) return NIL;
-    
-    uptr_t *args_p = refer(args);
-    while(!IS_NIL(CDR(*args_p)) && (eval(env, CAR(*args_p)) < eval(env, CADR(*args_p))))
-      *args_p = CDR(*args_p);
-    
-    uptr_t rval = NIL;
-    if (IS_NIL(CDR(*args_p)))
-      rval = eval(env, CAR(*args_p));
-    release(1); // args_p
-    return rval;
-  }
+  case S_EQL:
+#define _COMP_OPR ==
+    _COMPR
+#undef _COMP_OPR
+
+  case S_LT:
+#define _COMP_OPR <
+    _COMPR
+#undef _COMP_OPR
       
-  case S_MINUS: {
-    uptr_t *rem_args = refer(args);
-    int diff = eval(env, CAR(*rem_args));
-    *rem_args = CDR(*rem_args);
-    while (*rem_args) {
-      diff -= eval(env, CAR(*rem_args));
-      *rem_args = CDR(*rem_args);
-    }
-    release(1); // rem_args
-    return INTERN_INT(diff);
-  }
+  case S_LTE:
+#define _COMP_OPR <=
+    _COMPR
+#undef _COMP_OPR
+      
+  case S_GT:
+#define _COMP_OPR >
+    _COMPR
+#undef _COMP_OPR
+      
+  case S_GTE:
+#define _COMP_OPR >=
+    _COMPR
+#undef _COMP_OPR
+
+#define _ARITH {                                                \
+        if (IS_NIL(args)) return NIL;                           \
+        uptr_t *rem_args = refer(args);                         \
+        int coll = TO_INT(eval(env, CAR(*rem_args)));           \
+        *rem_args = CDR(*rem_args);                             \
+        while (*rem_args) {                                     \
+          coll _ARITH_OPR TO_INT(eval(env, CAR(*rem_args)));    \
+          *rem_args = CDR(*rem_args);                           \
+        }                                                       \
+        release(1);                                             \
+        return INTERN_INT(coll); }
+
+  case S_PLUS:
+#define _ARITH_OPR +=
+    _ARITH
+#undef _ARITH_OPR
+
+  case S_MINUS:
+#define _ARITH_OPR -=
+    _ARITH
+#undef _ARITH_OPR
+
+  case S_MULT:
+#define _ARITH_OPR *=
+    _ARITH
+#undef _ARITH_OPR
+
+  case S_DIV:
+#define _ARITH_OPR /=
+    _ARITH
+#undef _ARITH_OPR
 
   case S_SREG: {
     uptr_t *args_p = refer(args),

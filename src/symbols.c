@@ -37,7 +37,25 @@ void init_syms(uptr_t *env) {
   __mk_sym(S_MINUS);
   assoc(env, (SEND_p-4), (SEND_p-4));
 
+  __mk_sym(S_MULT);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
+  __mk_sym(S_DIV);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
+  __mk_sym(S_EQL);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
   __mk_sym(S_LT);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
+  __mk_sym(S_LTE);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
+  __mk_sym(S_GT);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
+  __mk_sym(S_GTE);
   assoc(env, (SEND_p-4), (SEND_p-4));
 
   __mk_sym(S_SREG);
