@@ -126,6 +126,30 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_CDR:
     return CDR(eval(env, CAR(args)));
 
+  case S_AND: {
+    if (IS_NIL(args)) return TRUE_p;
+    uptr_t *rem_args = refer(args),
+      rval = NIL;
+    while ((rval = eval(env, CAR(*rem_args))) && (*rem_args = CDR(*rem_args)));
+    release(1);
+    return rval;
+  }
+    
+  case S_OR: {
+    if (IS_NIL(args)) return NIL;
+    uptr_t *rem_args = refer(args),
+      rval = NIL;
+    while (!(rval = eval(env, CAR(*rem_args))) && (*rem_args = CDR(*rem_args)));
+    release(1);
+    return rval;
+  }
+
+  case S_NOT: {
+    if (IS_NIL(args)) return NIL;
+    uptr_t rval = eval(env, CAR(args));
+    return rval ? NIL : TRUE_p;
+  }
+    
   case S_IF: {
     uptr_t rval = NIL, *clauses = refer(args);
 

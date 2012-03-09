@@ -77,6 +77,7 @@ uptr_t CEND_p;
 uptr_t SSTART_p;
 uptr_t SEND_p;
 uptr_t *PTREND_p;
+uptr_t TRUE_p;
 
 #define TOTALMEM() (CEND_p    - SSTART_p)
 #define FREEMEM()  (CSTART_p  - SEND_p)

@@ -28,6 +28,19 @@ void init_syms(uptr_t *env) {
   __mk_sym(S_IF);
   assoc(env, (SEND_p-4), (SEND_p-4));
 
+  __mk_sym(S_AND);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
+  __mk_sym(S_OR);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
+  __mk_sym(S_NOT);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
+  __mk_sym(S_TRUE);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+  TRUE_p = SEND_p - 4;
+
   __mk_sym(S_EVAL);
   assoc(env, (SEND_p-4), (SEND_p-4));
 
