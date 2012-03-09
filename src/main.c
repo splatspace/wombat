@@ -209,74 +209,113 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_EVAL:
     return eval(env, eval(env, CAR(args)));
 
-#define _COMPR {                                                        \
+#define _COMPR(rval) {                                                  \
       if (IS_NIL(args)) return NIL;                                     \
                                                                         \
       uptr_t *args_p = refer(args);                                     \
       while(CDR(*args_p) && (eval(env, CAR(*args_p)) _COMP_OPR eval(env, CADR(*args_p)))) \
         *args_p = CDR(*args_p);                                         \
                                                                         \
-      uptr_t rval = NIL;                                                \
       if (IS_NIL(CDR(*args_p)))                                         \
         rval = eval(env, CAR(*args_p));                                 \
       release(1);                                                       \
-      return rval; }
+    }
 
-  case S_EQL:
 #define _COMP_OPR ==
-    _COMPR
+  case S_EQL: {
+    uptr_t rval;
+    _COMPR(rval);
+    return rval;
+  }
+
+  case S_NEQL: {
+    uptr_t rval;
+    _COMPR(rval);
+    return rval ? NIL : PS_TRUE;
+  }
 #undef _COMP_OPR
 
-  case S_LT:
 #define _COMP_OPR <
-    _COMPR
+  case S_LT: {
+    uptr_t rval;
+    _COMPR(rval);
+    return rval;
+  }
 #undef _COMP_OPR
       
-  case S_LTE:
 #define _COMP_OPR <=
-    _COMPR
+  case S_LTE: {
+    uptr_t rval;
+    _COMPR(rval);
+    return rval;
+  }
 #undef _COMP_OPR
       
-  case S_GT:
 #define _COMP_OPR >
-    _COMPR
+  case S_GT: {
+    uptr_t rval;
+    _COMPR(rval);
+    return rval;
+  }
 #undef _COMP_OPR
       
-  case S_GTE:
 #define _COMP_OPR >=
-    _COMPR
+  case S_GTE: {
+    uptr_t rval;
+    _COMPR(rval);
+    return rval;
+  }
 #undef _COMP_OPR
 
-#define _ARITH {                                                \
-        if (IS_NIL(args)) return NIL;                           \
-        uptr_t *rem_args = refer(args);                         \
-        int coll = TO_INT(eval(env, CAR(*rem_args)));           \
+#define _ARITH(coll) {                                          \
+      uptr_t *rem_args = refer(args);                           \
+      coll = TO_INT(eval(env, CAR(*rem_args)));                 \
+      *rem_args = CDR(*rem_args);                               \
+      while (*rem_args) {                                       \
+        coll _ARITH_OPR TO_INT(eval(env, CAR(*rem_args)));   \
         *rem_args = CDR(*rem_args);                             \
-        while (*rem_args) {                                     \
-          coll _ARITH_OPR TO_INT(eval(env, CAR(*rem_args)));    \
-          *rem_args = CDR(*rem_args);                           \
-        }                                                       \
-        release(1);                                             \
-        return INTERN_INT(coll); }
+      }                                                         \
+      release(1);                                               \
+    }
 
-  case S_PLUS:
 #define _ARITH_OPR +=
-    _ARITH
+  case S_PLUS: {
+    if (! args) return NIL;
+    if (! CDR(args)) return eval(env, CAR(args));
+    int rval;
+    _ARITH(rval);
+    return INTERN_INT(rval);
+  }
 #undef _ARITH_OPR
 
-  case S_MINUS:
 #define _ARITH_OPR -=
-    _ARITH
+  case S_MINUS: {
+    if (! args) return NIL;
+    if (! CDR(args)) return INTERN_INT(0 - TO_INT(eval(env, CAR(args))));
+    int rval;
+    _ARITH(rval);
+    return INTERN_INT(rval);
+  }
 #undef _ARITH_OPR
 
-  case S_MULT:
 #define _ARITH_OPR *=
-    _ARITH
+  case S_MULT: {
+    if (! args) return INTERN_INT(1);
+    if (! CDR(args)) return eval(env, CAR(args));
+    int rval;
+    _ARITH(rval);
+    return INTERN_INT(rval);
+  }
 #undef _ARITH_OPR
 
-  case S_DIV:
 #define _ARITH_OPR /=
-    _ARITH
+  case S_DIV: {
+    if (! args) return NIL;
+    if (! CDR(args)) return INTERN_INT(0);
+    int rval;
+    _ARITH(rval);
+    return INTERN_INT(rval);
+  }
 #undef _ARITH_OPR
 
   case S_SREG: {

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 typedef volatile intptr_t uptr_t;
 
@@ -86,6 +87,7 @@ uptr_t *PTREND_p;
 
 void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
+uptr_t build_list(uptr_t car, ...);
 inline void __mk_sym(uint32_t s);
 uptr_t build_symbol(char *name);
 
