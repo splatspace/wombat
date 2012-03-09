@@ -280,7 +280,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 
 #define _ARITH_OPR +=
   case S_PLUS: {
-    if (! args) return NIL;
+    if (! args) return INTERN_INT(0);
     if (! CDR(args)) return eval(env, CAR(args));
     int rval;
     _ARITH(rval);
@@ -311,7 +311,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 #define _ARITH_OPR /=
   case S_DIV: {
     if (! args) return NIL;
-    if (! CDR(args)) return TO_INT(CAR(args)) == 1 ? 1 : 0;
+    if (! CDR(args)) return INTERN_INT(eval(env, CAR(args)) == INTERN_INT(1) ? 1 : 0);
     int rval;
     _ARITH(rval);
     return INTERN_INT(rval);
