@@ -110,6 +110,17 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_LOOP:
     return loop(env, args);
 
+  case S_DO: {
+    uptr_t *body_p = refer(args), rval = NIL;
+    
+    while (*body_p) {
+      rval = eval(env, CAR(*body_p));
+      *body_p = CDR(*body_p);
+    }
+    release(1); // body_p
+    return rval;
+  } 
+
   case S_RECUR: {
     uptr_t rval, *fn_p = refer(fn);
     rval = build_cons(*fn_p, eval_list(env, args));

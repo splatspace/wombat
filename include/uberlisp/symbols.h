@@ -28,6 +28,7 @@
 
 #define S_LET   __SHASH4('L', 'E', 'T',  0)
 #define S_FN    __SHASH4('F', 'N',  0,   0)
+#define S_DO    __SHASH4('D', 'O',  0,   0)
 #define S_CAR   __SHASH4('C', 'A', 'R',  0)
 #define S_CDR   __SHASH4('C', 'D', 'R',  0)
 #define S_CONS  __SHASH4('C', 'O', 'N', 'S')

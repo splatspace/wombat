@@ -7,6 +7,9 @@ void init_syms(uptr_t *env) {
   __mk_sym(S_FN);
   assoc(env, (SEND_p-4), (SEND_p-4));
 
+  __mk_sym(S_DO);
+  assoc(env, (SEND_p-4), (SEND_p-4));
+
   __mk_sym(S_QUOTE);
   assoc(env, (SEND_p-4), (SEND_p-4));
 
