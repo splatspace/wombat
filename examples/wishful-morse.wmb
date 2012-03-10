@@ -1,0 +1,109 @@
+;;; Morse Code blinker in Wishful Wombat
+
+;;; IMAGINARY READER SUPPORT
+;; :keywords expand to quoted symbols, the convention is to use them as alist keys. :X => X
+;; [] is an alias for (), and is used by convention to represent data or bindings. '[1 2 3] => (1 2 3)
+;; {} expands to an association list. {:X '(1 2 3)} => ((X . (1 2 3)))
+
+;;; IMAGINARY MACROS
+;; wlet (when-let)
+;; ilet (if-let)
+;; defn - def + fn
+
+;;; IMAGINARY FEATURES
+;; recur inside fn - invokes fn again with recur-provided arg list
+
+;; Reverse lst.
+(defn rev [lst]
+  (loop [l lst, ret ()]
+    (ilet [fst (car l)]
+      (recur (cdr l) (cons fst ret))
+      ret)))
+
+;; Interpose lst with sep.
+(defn interp [sep lst]
+  (loop [l lst, ret ()]
+    (if (and (car l) (cdr l))
+      (recur (cdr l) (cons sep (cons (car l) ret)))
+      (rev (cons (car l) ret)))))
+
+;; Map lst over f.
+(defn map [f lst]
+  (loop [l lst, ret ()]
+    (ilet [x (car l)]
+      (recur (cdr l) (cons (f x) ret))
+      (rev ret))))
+
+;; Like map, but for side effects. Returns NIL.
+(defn each [f lst]
+  (wlet [x (car lst)]
+    (f x)
+    (recur f (cdr lst))))
+
+;; Find value for k in alst or NIL if not found.
+(defn get [alst k]
+  (wlet [pair (car alst)]
+    (if (= (car pair) k)
+      (cdr pair)
+      (recur (cdr alst) k))))
+
+;; Letters to morse codes.
+(def codes
+  {:a '[dot dash]
+   :b '[dash dot dot dot]
+   :c '[dash dot dash dot]
+   :d '[dash dot dot]
+   :e '[dot]
+   :f '[dot dot dash dot]
+   :g '[dash dash dot]
+   :h '[dot dot dot dot]
+   :i '[dot dot]
+   :j '[dot dash dash dash]
+   :k '[dash dot dash]
+   :l '[dot dash dot dot]
+   :m '[dash dash]
+   :n '[dash dot]
+   :o '[dash dash dash]
+   :p '[dot dash dash dot]
+   :q '[dash dash dot dash]
+   :r '[dot dash dot]
+   :s '[dot dot dot]
+   :t '[dash]
+   :u '[dot dot dash]
+   :v '[dot dot dot dash]
+   :w '[dot dash dash]
+   :x '[dash dot dot dash]
+   :y '[dash dot dash dash]
+   :z '[dash dash dot dot]})
+
+;; Blink and sleep times, in milliseconds.
+(def times
+  {:dot   200
+   :dash  600
+   :waitx 200    ;between dots and dashes of a letter
+   :waity 600})  ;between letters
+
+;; Turn on the LED for ms milliseconds.
+(defn led [ms]
+  (sreg _ddrb 255)
+  (sreg _portb 255)
+  (slp ms)
+  (sreg _portb 0))
+
+;; Blink a single letter as Morse code.
+(defn letter [ltr]
+  (let [code (get codes ltr)
+        leds (map (fn [c] (cons 'led (get times c))) code)]
+    (each eval (interp (cons 'slp (get times :waitx)) leds))))
+
+;; Blink a msg as Morse code.
+(defn morse [msg]
+  (wlet [m (car msg)]
+    (if (cdr msg)
+      (do
+        (letter m)
+        (slp (get times :waity))
+        (recur (cdr msg)))
+      (letter msg))))
+
+;;; (morse '(S O S))
