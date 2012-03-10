@@ -83,7 +83,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
       *new_vals = CDR(rval);
       *bindings_p = CAR(*form_p);
       while (*new_vals && *bindings_p) {
-        assoc(new_env, CAR(*bindings_p), eval(local_env, CAR(*new_vals)));
+        assoc(new_env, CAR(*bindings_p), CAR(*new_vals));
         *bindings_p = CDDR(*bindings_p);
         *new_vals = CDR(*new_vals);
       }
