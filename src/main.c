@@ -137,6 +137,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   }
 
   case S_CDR: {
+    if IS_NIL(CAR(args)) return NIL;
     uptr_t rval = CDR(eval(env, CAR(args)));
     return IS_REG(rval) ? NIL : rval;
   }
