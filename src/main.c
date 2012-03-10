@@ -91,7 +91,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
       *local_env = *new_env;
     }
   }
- 
+
   release(6); // bindings_p, body_p, form_p, local_env, new_env, new_vals
   return rval;
 }
@@ -112,14 +112,14 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 
   case S_DO: {
     uptr_t *body_p = refer(args), rval = NIL;
-    
+
     while (*body_p) {
       rval = eval(env, CAR(*body_p));
       *body_p = CDR(*body_p);
     }
     release(1); // body_p
     return rval;
-  } 
+  }
 
   case S_RECUR: {
     uptr_t rval, *fn_p = refer(fn);
@@ -131,11 +131,15 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_QUOTE:
     return CAR(args);
 
-  case S_CAR:
-    return CAR(eval(env, CAR(args)));
+  case S_CAR: {
+    uptr_t rval = CAR(eval(env, CAR(args)));
+    return IS_REG(rval) ? NIL : rval;
+  }
 
-  case S_CDR:
-    return CDR(eval(env, CAR(args)));
+  case S_CDR: {
+    uptr_t rval = CDR(eval(env, CAR(args)));
+    return IS_REG(rval) ? NIL : rval;
+  }
 
   case S_AND: {
     if (IS_NIL(args)) return PS_TRUE;
@@ -145,7 +149,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     release(1);
     return rval;
   }
-    
+
   case S_OR: {
     if (IS_NIL(args)) return NIL;
     uptr_t *rem_args = refer(args),
@@ -160,7 +164,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     uptr_t rval = eval(env, CAR(args));
     return rval ? NIL : PS_TRUE;
   }
-    
+
   case S_IF: {
     uptr_t rval = NIL, *clauses = refer(args);
 
@@ -185,7 +189,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     release(2); // cond_p, body_p
     return rval;
   }
-    
+
   case S_CONS: {
     uptr_t rval = NIL, *args_p = refer(args);
     rval = build_cons(eval(env, CAR(*args_p)), eval(env, CADR(*args_p)));
@@ -242,7 +246,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return rval;
   }
 #undef _COMP_OPR
-      
+
 #define _COMP_OPR <=
   case S_LTE: {
     uptr_t rval = NIL;
@@ -250,7 +254,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return rval;
   }
 #undef _COMP_OPR
-      
+
 #define _COMP_OPR >
   case S_GT: {
     uptr_t rval = NIL;
@@ -258,7 +262,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     return rval;
   }
 #undef _COMP_OPR
-      
+
 #define _COMP_OPR >=
   case S_GTE: {
     uptr_t rval = NIL;
@@ -347,7 +351,7 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
 uptr_t eval_list(uptr_t *env, uptr_t list) {
   if (IS_NIL(list))
     return NIL;
-  
+
   uptr_t *list_p = refer(list), rval;
   rval = build_cons(eval(env, CAR(*list_p)), eval_list(env, CDR(*list_p)));
   release(1); // list_p
@@ -362,8 +366,8 @@ uptr_t eval(uptr_t *env, uptr_t form) {
     return get(*env, form);
 
   if (IS_CONS(form)) {
-    uptr_t *form_p = refer(form), 
-      *fn_p = refer(eval(env, CAR(*form_p))), 
+    uptr_t *form_p = refer(form),
+      *fn_p = refer(eval(env, CAR(*form_p))),
       rval;
 
     if (IS_SYM(*fn_p)) {
@@ -381,7 +385,7 @@ uptr_t eval(uptr_t *env, uptr_t form) {
     release(2); // form_p, fn_p
     return rval;
   }
-  
+
   return NIL;
 }
 
