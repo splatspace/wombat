@@ -1,49 +1,54 @@
 ;;; Morse Code blinker
 
 ;; Letters to morse codes.
-(def codes
-  '((a . (dot dash))
-    (b . (dash dot dot dot))
-    (c . (dash dot dash dot))
-    (d . (dash dot dot))
-    (e . (dot))
-    (f . (dot dot dash dot))
-    (g . (dash dash dot))
-    (h . (dot dot dot dot))
-    (i . (dot dot))
-    (j . (dot dash dash dash))
-    (k . (dash dot dash))
-    (l . (dot dash dot dot))
-    (m . (dash dash))
-    (n . (dash dot))
-    (o . (dash dash dash))
-    (p . (dot dash dash dot))
-    (q . (dash dash dot dash))
-    (r . (dot dash dot))
-    (s . (dot dot dot))
-    (t . (dash))
-    (u . (dot dot dash))
-    (v . (dot dot dot dash))
-    (w . (dot dash dash))
-    (x . (dash dot dot dash))
-    (y . (dash dot dash dash))
-    (z . (dash dash dot dot))))
+;; Encoded in 2 bits:
+;;   01 = dot
+;;   11 = dash
+;; Bit-pairs are in reverse order!
+;;   E.G. 00010111 = dash dot dot (11 01 01)
+;; (def codes
+;;   '(a (dot dash)
+;;     b (dash dot dot dot)
+;;     c (dash dot dash dot)
+;;     d (dash dot dot)
+;;     e (dot)
+;;     f (dot dot dash dot)
+;;     g (dash dash dot)
+;;     h (dot dot dot dot)
+;;     i (dot dot)
+;;     j (dot dash dash dash)
+;;     k (dash dot dash)
+;;     l (dot dash dot dot)
+;;     m (dash dash)
+;;     n (dash dot)
+;;     o (dash dash dash)
+;;     p (dot dash dash dot)
+;;     q (dash dash dot dash)
+;;     r (dot dash dot)
+;;     s (dot dot dot)
+;;     t (dash)
+;;     u (dot dot dash)
+;;     v (dot dot dot dash)
+;;     w (dot dash dash)
+;;     x (dash dot dot dash)
+;;     y (dash dot dash dash)
+;;     z (dash dash dot dot)))
+(def codes '(a 13 b 87 c 119 d 23 e 1 f 117 g 31 h 85 i 5 j 253 k 55 l 93 m 15 n 7 o 63 p 125 q 223 r 29 s 21 t 3 u 53 v 213 w 61 x 215 y 247 z 95))
 
 ;; Blink and sleep times, in milliseconds.
 (def times
-  '((dot  . 200)
-    (dash . 600)
-    (wait . 600)))
+  '(dot  200
+    dash 600
+    wait 600))
 
 ;; Find value for key k in association list alst or NIL if not found.
 (def find
   (fn (alst k)
     (loop (lst alst)
-      (let (pair (car lst))
-        (when pair
-          (if (= (car pair) k)
-            (cdr pair)
-            (recur (cdr lst))))))))
+      (when lst
+        (if (= (car lst) k)
+          (car (cdr pair))
+          (recur (cdr (cdr lst))))))))
 
 ;; Turn on the LED for ms milliseconds.
 (def led
@@ -57,12 +62,13 @@
 (def morse
   (fn (msg)
     (loop (m msg)
-      (when (car m)
+      (when m
         (loop (patt (find codes (car m)))
-          (when (car patt)
-            (led (find times (car patt)))
-            (recur (cdr patt))))
-        (slp (find times 'wait))
+          (let (c (& patt 3))
+            (when (not= 0 c)
+              (led (* 200 c))
+              (recur (>> patt 2)))))
+        (slp 600)
         (recur (cdr m))))))
 
 ;;; (morse '(S O S))
