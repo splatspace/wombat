@@ -91,8 +91,23 @@ void init_syms(uptr_t *env) {
   SVAL(PS_WHEN) = S_WHEN;
   assoc(env, PS_WHEN, PS_WHEN);
 
+  SVAL(PS_BAND) = S_BAND;
+  assoc(env, PS_BAND, PS_BAND);
+
+  SVAL(PS_BOR) = S_BOR;
+  assoc(env, PS_BOR, PS_BOR);
+
+  SVAL(PS_BXOR) = S_BXOR;
+  assoc(env, PS_BXOR, PS_BXOR);
+
+  SVAL(PS_BSL) = S_BSL;
+  assoc(env, PS_BSL, PS_BSL);
+
+  SVAL(PS_BSR) = S_BSR;
+  assoc(env, PS_BSR, PS_BSR);
+
   // Must be updated when symbols are added
-  SEND_p = PS_WHEN + 4;
+  SEND_p = PS_BSR + 4;
 
   // Registers
   __mk_sym(S__DDRB);

@@ -83,7 +83,7 @@ uptr_t loop(uptr_t *env, uptr_t form) {
       *new_vals = CDR(rval);
       *bindings_p = CAR(*form_p);
       while (*new_vals && *bindings_p) {
-        assoc(new_env, CAR(*bindings_p), CAR(*new_vals));
+        assoc(new_env, CAR(*bindings_p), eval(local_env, CAR(*new_vals)));
         *bindings_p = CDDR(*bindings_p);
         *new_vals = CDR(*new_vals);
       }
@@ -131,16 +131,11 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_QUOTE:
     return CAR(args);
 
-  case S_CAR: {
-    uptr_t rval = CAR(eval(env, CAR(args)));
-    return IS_REG(rval) ? NIL : rval;
-  }
+  case S_CAR:
+    return CAR(eval(env, CAR(args)));
 
-  case S_CDR: {
-    if IS_NIL(CAR(args)) return NIL;
-    uptr_t rval = CDR(eval(env, CAR(args)));
-    return IS_REG(rval) ? NIL : rval;
-  }
+  case S_CDR:
+    return CDR(eval(env, CAR(args)));
 
   case S_AND: {
     if (IS_NIL(args)) return PS_TRUE;
@@ -320,6 +315,56 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
     int rval;
     _ARITH(rval);
     return INTERN_INT(rval);
+  }
+#undef _ARITH_OPR
+
+#define _ARITH_OPR &=
+  case S_BAND: {
+    if (! args) return NIL;
+    if (! CDR(args)) return eval(env, CAR(args));
+    uint8_t rval;
+    _ARITH(rval);
+    return INTERN_INT((int)rval);
+  }
+#undef _ARITH_OPR
+
+#define _ARITH_OPR |=
+  case S_BOR: {
+    if (! args) return NIL;
+    if (! CDR(args)) return eval(env, CAR(args));
+    uint8_t rval;
+    _ARITH(rval);
+    return INTERN_INT((int)rval);
+  }
+#undef _ARITH_OPR
+
+#define _ARITH_OPR ^=
+  case S_BXOR: {
+    if (! args) return NIL;
+    if (! CDR(args)) return eval(env, CAR(args));
+    uint8_t rval;
+    _ARITH(rval);
+    return INTERN_INT((int)rval);
+  }
+#undef _ARITH_OPR
+
+#define _ARITH_OPR <<=
+  case S_BSL: {
+    if (! args) return NIL;
+    if (! CDR(args)) return eval(env, CAR(args));
+    uint8_t rval;
+    _ARITH(rval);
+    return INTERN_INT((int)rval);
+  }
+#undef _ARITH_OPR
+
+#define _ARITH_OPR >>=
+  case S_BSR: {
+    if (! args) return NIL;
+    if (! CDR(args)) return eval(env, CAR(args));
+    uint8_t rval;
+    _ARITH(rval);
+    return INTERN_INT((int)rval);
   }
 #undef _ARITH_OPR
 

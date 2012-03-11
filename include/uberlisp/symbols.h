@@ -46,13 +46,18 @@
 #define S_EQL   __SHASH4('=',  0,   0,   0)
 #define S_NEQL  __SHASH4('N', 'O', 'T', '=')
 #define S_LT    __SHASH4('<',  0,   0,   0)
-#define S_LTE   __SHASH4('<',  '=', 0,   0)
+#define S_LTE   __SHASH4('<', '=',  0,   0)
 #define S_GT    __SHASH4('>',  0,   0,   0)
-#define S_GTE   __SHASH4('>',  '=', 0,   0)
+#define S_GTE   __SHASH4('>', '=',  0,   0)
 #define S_SREG  __SHASH4('S', 'R', 'E', 'G')
 #define S_SLP   __SHASH4('S', 'L', 'P',  0)
 #define S_LOOP  __SHASH4('L', 'O', 'O', 'P')
 #define S_WHEN  __SHASH4('W', 'H', 'E', 'N')
+#define S_BAND  __SHASH4('&',  0,   0,   0)
+#define S_BOR   __SHASH4('|',  0,   0,   0)
+#define S_BXOR  __SHASH4('^',  0,   0,   0)
+#define S_BSL   __SHASH4('<', '<',  0,   0)
+#define S_BSR   __SHASH4('>', '>',  0,   0)
 
 #define _Z_ ('A' - 1) // hashes to 0
 #define _U_ ('A' + USCORE_HSH - 1) // hashes to USCORE_HSH
@@ -94,6 +99,11 @@
 #define PS_LOOP  (SSTART_p + 0x6C)
 #define PS_RECUR (SSTART_p + 0x70)
 #define PS_WHEN  (SSTART_p + 0x74)
+#define PS_BAND  (SSTART_p + 0x78)
+#define PS_BOR   (SSTART_p + 0x7C)
+#define PS_BXOR  (SSTART_p + 0x80)
+#define PS_BSL   (SSTART_p + 0x84)
+#define PS_BSR   (SSTART_p + 0x88)
 
 void init_syms(uptr_t *env);
 

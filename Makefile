@@ -10,12 +10,10 @@ CLOCK      = 16000000UL
 # OBJECTS    = src/arduino_io.o src/alist.o src/main.o src/print_form.o src/read_form.o src/types.o
 OBJECTS    = src/arduino_io.o src/print_form.o src/read_form.o src/types.o src/alist.o src/symbols.o src/gc.o src/debug.o src/main.o
 
-# UNOTTY = /dev/ttyACM0
-UNOTTY = /dev/tty.usbmodemfd121
+UNOTTY = /dev/ttyACM0
 UNOBAUD = 115200
 
-# DUETTY = /dev/ttyUSB0
-DUETTY = /dev/tty.usbserial-A700dEu5
+DUETTY = /dev/ttyUSB0
 DUEBAUD = 57600
 
 
