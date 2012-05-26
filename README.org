@@ -1,1 +1,1 @@
-uberlisp: an in-progress lisp1 interpreter for the Arduino
+wombat: an in-progress lisp1 interpreter for the Arduino
