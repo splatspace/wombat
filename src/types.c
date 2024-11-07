@@ -1,5 +1,11 @@
 #include <uberlisp/types.h>
 
+uptr_t CSTART_p;
+uptr_t CEND_p;
+uptr_t SSTART_p;
+uptr_t SEND_p;
+uptr_t *PTREND_p;
+
 void init_mem() {
   CSTART_p = CEND_p = UPTR(&__heap_start) - PTR_CACHE_SIZE;
   PTREND_p = (uptr_t *)CEND_p;
@@ -22,18 +28,13 @@ uptr_t build_cons(uptr_t car, uptr_t cdr) {
     *UPTR_PTR(CSTART_p) = car;
     *UPTR_PTR(CSTART_p + sizeof(uptr_t)) |= CADR_FLAG;
     return CSTART_p;
-  } 
+  }
 
   CSTART_p -= sizeof(Cons);
   Cons *new_cons = (Cons*)CPTR(CSTART_p);
   new_cons->car = car;
   new_cons->cdr = cdr;
   return UPTR(new_cons);
-}
-
-void __mk_sym(uint32_t s) {
-  SVAL(SEND_p) = s;
-  SEND_p += 4;
 }
 
 uptr_t build_symbol(char *name) {
@@ -49,7 +50,7 @@ uptr_t build_symbol(char *name) {
     SEND_p += 4;
   else
     SVAL(SEND_p) = 0;
-  
+
   return finder;
 }
 
@@ -63,7 +64,7 @@ uint32_t hash_sym(char *name) {
     int i;
     for (i = 0; i < len; i++)
       ((char*)&hash)[i] = (char)toupper(name[i]);
-    
+
     hash |= LIT_SYM_FLAG;
   } else {
     int i;
@@ -99,13 +100,4 @@ void unhash_sym(char *buf, uptr_t sym_p) {
       ++cur;
     }
   }
-}
-
-uptr_t *refer(uptr_t uptr) {
-  *PTREND_p = uptr;
-  return PTREND_p++;
-}
-
-void release(int ptr_count) {
-  PTREND_p -= ptr_count;
 }

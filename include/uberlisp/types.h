@@ -58,7 +58,7 @@ typedef volatile intptr_t uptr_t;
 
 #define EQ(uptr1, uptr2) (VAL(uptr1) == VAL(uptr2))
 
-typedef struct { 
+typedef struct {
   uptr_t car;
   uptr_t cdr;
 } Cons;
@@ -73,11 +73,11 @@ extern char __bss_end;
 
 #define PTR_CACHE_SIZE 128
 
-uptr_t CSTART_p;
-uptr_t CEND_p;
-uptr_t SSTART_p;
-uptr_t SEND_p;
-uptr_t *PTREND_p;
+extern uptr_t CSTART_p;
+extern uptr_t CEND_p;
+extern uptr_t SSTART_p;
+extern uptr_t SEND_p;
+extern uptr_t *PTREND_p;
 
 #define TOTALMEM() (CEND_p    - SSTART_p)
 #define FREEMEM()  (CSTART_p  - SEND_p)
@@ -88,10 +88,19 @@ uptr_t *PTREND_p;
 void init_mem();
 uptr_t build_cons(uptr_t car, uptr_t cdr);
 uptr_t build_list(uptr_t car, ...);
-inline void __mk_sym(uint32_t s);
+static inline void __mk_sym(uint32_t s) {
+  SVAL(SEND_p) = s;
+  SEND_p += 4;
+}
 uptr_t build_symbol(char *name);
 
-inline uptr_t *refer(uptr_t uptr);
-inline void release(int ptr_count);
+static inline uptr_t *refer(uptr_t uptr) {
+  *PTREND_p = uptr;
+  return PTREND_p++;
+}
+
+static inline void release(int ptr_count) {
+  PTREND_p -= ptr_count;
+}
 
 #endif
