@@ -371,9 +371,16 @@ uptr_t exec_special(uptr_t *env, uptr_t form) {
   case S_SREG: {
     uptr_t *args_p = refer(args),
       reg = eval(env, CAR(*args_p));
-    if (IS_REG(reg))
-      *BYTE_PTR(reg) = eval(env, CADR(*args_p));
-    else {
+    if (IS_REG(reg)) {
+      uptr_t val = eval(env, CADR(*args_p));
+      if (IS_INT(val)) {
+        *BYTE_PTR(reg) = (uint8_t)TO_INT(val);
+      } else {
+        printf_P(PSTR("Register must be set to int. got: "));
+        print_form(val);
+        printf_P(PSTR("\n"));
+      }
+    } else {
       printf_P(PSTR("Invalid register: "));
       print_form(reg);
       printf_P(PSTR("\n"));
